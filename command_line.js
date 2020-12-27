@@ -40,18 +40,12 @@ document.getElementById("command").addEventListener("keydown", event => {
             beforeHistory.push(afterHistory.pop());
         }
         beforeHistory.push(ele.value);
-        console.log(beforeHistory.arr);
         ele.value = "";
         commandHistory.append(student, atmark, recursionist, command);
     }else if(event.keyCode == 38){
-        if(beforeHistory.isEmpty()) return;
-        if(ele.value.length > 0) afterHistory.push(ele.value);
-        let value = beforeHistory.pop();
-        ele.value = value;
+        moveCommandToOtherStack(ele, beforeHistory, afterHistory);
     }else if(event.keyCode == 40){
-        if(afterHistory.isEmpty()) return;
-        if(ele.value.length > 0) beforeHistory.push(ele.value);
-        ele.value = afterHistory.pop();
+        moveCommandToOtherStack(ele, afterHistory, beforeHistory);
     }else{
     }
 });
@@ -66,3 +60,10 @@ let createSpanTag = (innerHTML, classNameArr) => {
     return span;
 }
 
+// コマンドをスタック間で移動させる
+let moveCommandToOtherStack = (ele, fromStack, toStack) => {
+    if (fromStack.isEmpty()) return;
+    let value = fromStack.pop();
+    ele.value = value;
+    toStack.push(value);
+}
