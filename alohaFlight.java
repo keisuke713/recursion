@@ -1,6 +1,5 @@
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
@@ -119,9 +118,9 @@ class Flight implements FlightInterface{
     private Seat[] seats;
 
     public Flight(String flightNumber, String origin, String destination, String date){
-        this.flightNumber = setAttribute(flightNumber);
-        this.origin = setAttribute(origin);
-        this.destination = setAttribute(destination);
+        this.flightNumber = setFlightNumber(flightNumber);
+        this.origin = setOriginOrDestination(origin);
+        this.destination = setOriginOrDestination(destination);
         this.date = setDate(date);
         this.seats = generateSeats();
     }
@@ -217,16 +216,27 @@ class Flight implements FlightInterface{
         return "fligntInfo:" + "\n" + "flightNumber: " + getFlightNum() + "\n" + " origin: " + getOrigin() + "\n" + " destination: " + getDestination() + "\n" + " date: " + getDate() + "\n" + getSeatsInfo();
     }
 
-    public static String setAttribute(String argument){
+    public static void isArgumentNull(String argument){
         if(argument == null) throw new NullPointerException();
+    }
+
+    public static String setFlightNumber(String argument){
+        isArgumentNull(argument);
+        return argument;
+    }
+
+    public static String setOriginOrDestination(String argument){
+        isArgumentNull(argument);
+        if(!argument.matches("[A-Z]{3}")) throw new IllegalArgumentException();
         return argument;
     }
 
     public static String setDate(String date){
+        isArgumentNull(date);
         try{
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
             sdf.setLenient(false);
-            sdf.parse("date");
+            sdf.parse(date);
         }catch(ParseException e){
             System.out.println(e);
             System.exit(0);
@@ -261,7 +271,7 @@ class Seat implements SeatInterface {
     private CustConf custConf;
 
     public Seat(String seatNumber){
-        this.seatNumber = setAttribute(seatNumber);
+        this.seatNumber = setSeatNumber(seatNumber);
         // this.price = price;
         // this.recline = recline;
         // this.mealType = mealType;
@@ -308,6 +318,7 @@ class Seat implements SeatInterface {
      */
     @Override
     public void setPrice(double price){
+        if(price < 0.0) throw new IllegalArgumentException();
         this.price = price;
     }
 
@@ -318,6 +329,7 @@ class Seat implements SeatInterface {
      */
     @Override
     public void setRecline(int recline){
+        if(recline < 0) throw new IllegalArgumentException();
         this.recline = recline;
     }
 
@@ -345,11 +357,15 @@ class Seat implements SeatInterface {
     }
 
     public String toString(){
-        return "seatInfo:" + "\n" + "seatNumber: " + getNumber() + "\n" + " price: " + getPrice() + "\n" + " recline: " + getRecline() + "\n" + "mealType:" + getMealType() + "\n" + "customerInfo:" + Objects.toString(getCustConf()) + "\n";
+        return "seatInfo:" + "\n" + "seatNumber: " + getNumber() + "\n" + " price: " + getPrice() + "\n" + " recline: " + getRecline() + "\n" + "mealType:" + getMealType() + "\n" + "customerInfo:" + "\n" + Objects.toString(getCustConf()) + "\n";
     }
 
-    public static String setAttribute(String argument){
+    public static void isArgumentNull(String argument){
         if(argument == null) throw new NullPointerException();
+    }
+
+    public static String setSeatNumber(String argument){
+        isArgumentNull(argument);
         return argument;
     }
 }
@@ -358,9 +374,8 @@ class CustConf implements CustConfInterface{
     private String name;
     private String confirmationCode;
 
-    public CustConf(String name, String confirmationCode){
-        this.name = setAttribute(name);
-        this.confirmationCode = confirmationCode;
+    public CustConf(String name){
+        this.name = setName(name);
     }
 
     @Override
@@ -373,20 +388,33 @@ class CustConf implements CustConfInterface{
         return confirmationCode;
     }
 
+    public String setName(String name){
+        isArgumentNull(name);
+        return name;
+    }
+
+    public void setConfirmationCode(String argument){
+        if(!argument.matches("[a-zA-Z]{6}")) throw new IllegalArgumentException();
+        this.confirmationCode = argument;
+    }
+
     public String toString(){
         return "name: " + getName() + "\n" + "confirmation: " + getConfirmationCode();
     }
 
-    public static String setAttribute(String argument){
+    public static void isArgumentNull(String argument){
         if(argument == null) throw new NullPointerException();
-        return argument;
     }
 }
 
 public class Main{
     public static void main(String[] args){
         Flight flight = new Flight("airbone", "HND", "NRT", "01/08/2021");
-        System.out.println(flight.getDate());
-        // System.out.println(flight.getSeats()[0].toString());
+        Seat seat = flight.getSeats()[0];
+        seat.setCustConf(new CustConf("keisuke"));
+        seat.getCustConf().setConfirmationCode("GldDEg");
+        System.out.println(seat);
+        seat.removeCustConf();
+        System.out.println(seat);
     }
 }
