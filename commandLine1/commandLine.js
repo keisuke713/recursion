@@ -29,18 +29,30 @@ class Stack{
 
 class FileTree{
     constructor(){
-        currentDir = new Node("root", "dir");
+        this.rootDir = new Node("root", "dir");
+        this.currentDir = this.rootDir;
     }
 }
 
 // フォルダかファイルのインスタンスを作成
 class Node{
+    static type = {0: "dir", 1: "file"};
+    // インスタンス変数
+    // name フォルダorファイルの名前
+    // type フォルダかファイル
+    // dateModified 更新日
+    // next　次のノード(同じ階層)
+    // path 絶対ぱす
+    // childSinglyList 子階層(フォルダのみ)
+    // content　中身(ファイルのみ)
     constructor(name, type){
         this.name = name;
-        this.childSinglyList = new SinglyList();
         this.type = type;
-        this.content = null;
+        this.dateModified = new Date();
         this.next = null;
+        // this.path = [];
+        this.childSinglyList = new SinglyList();
+        this.content = null;
     }
 }
 
@@ -99,6 +111,9 @@ let afterHistory = new Stack();
 let CLITextInput = document.getElementById(config.CLITextInputID);
 let CLIOutputDiv = document.getElementById(config.CLIOutputDivID);
 
+let fileTree = new FileTree();
+console.log(fileTree);
+
 CLITextInput.addEventListener("keyup", (event)=>submitSearch(event));
 
 function submitSearch(event){
@@ -126,6 +141,20 @@ function submitSearch(event){
             CLIOutputDiv.scrollTop = CLIOutputDiv.scrollHeight;
             return;
         }
+        if(["pwd"].indexOf(parsedCLIArray[0]) != -1) validateResponse = FileSystem.noArgValidator(parsedCLIArray);     
+        else validateResponse = FileSystem.singleArgValidator(parsedCLIArray);
+        if(!validateResponse["isValid"]){
+            FileSystem.appendErrorParagraph(CLIOutputDiv, validateResponse["errorMessage"]);
+            CLIOutputDiv.scrollTop = CLIOutputDiv.scrollHeight;
+            return;
+        }
+        if(["setContent"].indexOf(parsedCLIArray[0]) != -1) validateResponse = FileSystem.doubleArgValidator(parsedCLIArray);
+        if(!validateResponse["isValid"]){
+            FileSystem.appendErrorParagraph(CLIOutputDiv, validateResponse["errorMessage"]);
+            CLIOutputDiv.scrollTop = CLIOutputDiv.scrollHeight;
+            return;
+        }
+
     }else if(event.keyCode == 38){
         moveCommandToOtherStack(CLITextInput, beforeHistory, afterHistory);
     }else if(event.keyCode == 40){
@@ -153,14 +182,32 @@ class FileSystem{
     // 全コマンド共通バリデーション
     // コマンド、引数以外入力していないか、サポートしているコマンド以外を入力していないかを確認
     static universalValidator(parsedArray){
-        if(parsedArray.length > 2) return {isValid: false, errorMessage: "too much arguments"};
+        if(parsedArray.length > 3) return {isValid: false, errorMessage: "too much arguments"};
         if(FileSystem.commands.indexOf(parsedArray[0]) == -1) return {isValid: false, errorMessage: `does not exist ${parsedArray[0]}`};
         return {isValid: true, errorMessage: ""};
     }
 
+    // 引数を取らないls,pwdコマンドのバリデーション
+    static noArgValidator(parsedCLIArray){
+        if(parsedCLIArray.length > 0) return {"isValid": false, "errorMessage": `${parsedCLIArray[0]} needs no argument`};
+        return {"isValid": true, "errorMessage": ""};
+    }
+
+    // 引数を一つ取るコマンドのバリデーション
+    static singleArgValidator(parsedCLIArray){
+        if(parsedCLIArray[0] != "ls" && parsedCLIArray[1] == null) return {"isValid": false, "errorMessge": `${parsedCLIArray[0]} require single argument`};
+        if(parsedCLIArray[1].split("/").length > 1) return {"isValid": false, "errorMessage": `too deep path`};
+        return {"isValid": true, "errorMessage": ""};
+    }
+
+    // 引数を二つ取るコマンドのバリデーション
+    static doubleArgValidator(parsedCLIArray){
+        if(parsedCLIArray[2] == null) return {"isValid": false, errorMessage: `${parsedCLIArray[0]} require two argument`};
+        return {"isValid": true, "errorMessage": ""};
+    }
+
     // 入力されたコマンドを履歴として表示
     static appendMirrorParagraph(parentDiv){
-
         parentDiv.innerHTML+=
             `<p class="m-0">
             <span style='color:green'>student</span>
