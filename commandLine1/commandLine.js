@@ -29,7 +29,7 @@ class Stack{
 
 class FileTree{
     constructor(){
-        this.rootDir = new Node("root", "dir");
+        this.rootDir = new Node("root", 0);
         this.currentDir = this.rootDir;
     }
 }
@@ -54,6 +54,11 @@ class Node{
         this.childSinglyList = new SinglyList();
         this.content = null;
     }
+
+    getType(){
+        return Node.type[this.type];
+        // return Node.type;
+    }
 }
 
 // 同じ階層は単一方向リストでまとめる
@@ -64,9 +69,10 @@ class SinglyList{
     append(node){
         if(this.head == null){
             this.head = node;
+            return;
         }
         let iterator = this.head;
-        while(iterator != null){
+        while(iterator.next != null){
             iterator = iterator.next;
         }
         iterator.next = node;
@@ -85,6 +91,17 @@ class SinglyList{
             prevIterator = currIterator;
             currIterator = currIterator.next;
         } 
+    }
+    printList(){
+        let result = "";
+
+        let iterator = this.head;
+        while(iterator != null){
+            result += `${iterator.name} `;
+            iterator = iterator.next;
+        }
+        console.log(result);
+        return result;
     }
 }
 
@@ -112,7 +129,6 @@ let CLITextInput = document.getElementById(config.CLITextInputID);
 let CLIOutputDiv = document.getElementById(config.CLIOutputDivID);
 
 let fileTree = new FileTree();
-console.log(fileTree);
 
 CLITextInput.addEventListener("keyup", (event)=>submitSearch(event));
 
@@ -155,12 +171,15 @@ function submitSearch(event){
             return;
         }
 
+        FileSystem.appendResultParagraph(CLIOutputDiv, true, FileSystem.executeCommand(parsedCLIArray));
+
     }else if(event.keyCode == 38){
         moveCommandToOtherStack(CLITextInput, beforeHistory, afterHistory);
     }else if(event.keyCode == 40){
         moveCommandToOtherStack(CLITextInput, afterHistory, beforeHistory);
     }else{}
 }
+alert("今日はlsコマンドに引数つけたところから")
 
 class FileSystem{
     // 対応しているコマンド
@@ -183,7 +202,7 @@ class FileSystem{
     // コマンド、引数以外入力していないか、サポートしているコマンド以外を入力していないかを確認
     static universalValidator(parsedArray){
         if(parsedArray.length > 3) return {isValid: false, errorMessage: "too much arguments"};
-        if(FileSystem.commands.indexOf(parsedArray[0]) == -1) return {isValid: false, errorMessage: `does not exist ${parsedArray[0]}`};
+        if(FileSystem.commands.indexOf(parsedArray[0]) == -1) return {isValid: false, errorMessage: `${parsedArray[0]} does not exist`};
         return {isValid: true, errorMessage: ""};
     }
 
@@ -196,7 +215,20 @@ class FileSystem{
     // 引数を一つ取るコマンドのバリデーション
     static singleArgValidator(parsedCLIArray){
         if(parsedCLIArray[0] != "ls" && parsedCLIArray[1] == null) return {"isValid": false, "errorMessge": `${parsedCLIArray[0]} require single argument`};
-        if(parsedCLIArray[1].split("/").length > 1) return {"isValid": false, "errorMessage": `too deep path`};
+        if(parsedCLIArray.length > 1 && parsedCLIArray[1].split("/").length > 1) return {"isValid": false, "errorMessage": `too deep path`};
+        if(["mkdir"].indexOf(parsedCLIArray[0]) != -1){
+            if(FileSystem.existNode(fileTree.currentDir.childSinglyList, parsedCLIArray[1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
+        } else if(["touch"].indexOf(parsedCLIArray[0]) != -1){
+            if(FileSystem.existNode(fileTree.currentDir.childSinglyList, parsedCLIArray[1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
+        } else if(["cd"].indexOf(parsedCLIArray[0]) != -1){
+            if(!FileSystem.existNode(fileTree.currentDir.childSinglyList, parsedCLIArray[1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+        } else if(["print", "setContent"].indexOf(parsedCLIArray[0]) != -1){
+            if(!FileSystem.existNode(fileTree.currentDir.childSinglyList, parsedCLIArray[1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+        } else {
+            if(parsedCLIArray[1] != null){
+                if(!FileSystem.existNode(fileTree.currentDir.childSinglyList, parsedCLIArray[1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+            }
+        }
         return {"isValid": true, "errorMessage": ""};
     }
 
@@ -204,6 +236,48 @@ class FileSystem{
     static doubleArgValidator(parsedCLIArray){
         if(parsedCLIArray[2] == null) return {"isValid": false, errorMessage: `${parsedCLIArray[0]} require two argument`};
         return {"isValid": true, "errorMessage": ""};
+    }
+
+    // 入力された文字列をもとに処理を実行
+    static executeCommand(parsedArray){
+        let command = parsedArray[0];
+        switch(command){
+            case "pwd":
+                break;
+            case "touch":
+                fileTree.currentDir.childSinglyList.append(new Node(parsedArray[1], 1));
+                console.log(fileTree.currentDir.childSinglyList);
+                break;
+            case "mkdir":
+                fileTree.currentDir.childSinglyList.append(new Node(parsedArray[1], 0));
+                console.log(fileTree.currentDir.childSinglyList);
+                break;
+            case "ls":
+                console.log("fjdlsfa");
+                if(parsedArray[1] == null) return fileTree.currentDir.childSinglyList.printList();
+                break;
+            case "cd":
+                break;
+            case "print":
+                break;
+            case "rm":
+                break;
+            case "setContent":
+                break;
+            default:
+                console.log(`${command} doesn't unsupported`);
+        }
+        return "";
+    }
+
+    static existNode(singlyList, name, types){
+        if(singlyList.head == null) return false;
+        let iterator = singlyList.head;
+        while(iterator != null){
+            if(iterator.name == name && types.indexOf(iterator.type) != -1) return true;
+            iterator = iterator.next;
+        }
+        return false;
     }
 
     // 入力されたコマンドを履歴として表示
@@ -226,5 +300,24 @@ class FileSystem{
                 <span style='color:red'>CLIError</span>: ${errorMessage}
             </p>`;
         return
+    }
+
+    // 評価結果を表示
+    static appendResultParagraph(parentDiv, isValid, message){
+        let promptName = "";
+        let promptColor = "";
+        if (isValid){
+            promptName = "FileSystem";
+            promptColor = "turquoise";
+        }
+        else{
+            promptName = "FileSystem";
+            promptColor = "red";
+        }
+        parentDiv.innerHTML+=
+                `<p class="m-0">
+                    <span style='color: ${promptColor}'>${promptName}</span>: ${message}
+                </p>`;
+        return;
     }
 }
