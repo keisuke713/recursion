@@ -29,7 +29,7 @@ class Stack{
 
 class FileTree{
     constructor(){
-        this.rootDir = new Node("root", 0);
+        this.rootDir = new Node("root", 0, null);
         this.currentDir = this.rootDir;
     }
 }
@@ -45,19 +45,19 @@ class Node{
     // path 絶対ぱす
     // childSinglyList 子階層(フォルダのみ)
     // content　中身(ファイルのみ)
-    constructor(name, type){
+    constructor(name, type, parentNode){
         this.name = name;
         this.type = type;
         this.dateModified = new Date();
         this.next = null;
         // this.path = [];
+        this.parentNode = parentNode;
         this.childSinglyList = new SinglyList();
         this.content = null;
     }
 
     getType(){
         return Node.type[this.type];
-        // return Node.type;
     }
 }
 
@@ -100,8 +100,24 @@ class SinglyList{
             result += `${iterator.name} `;
             iterator = iterator.next;
         }
-        console.log(result);
         return result;
+    }
+    existNode(name, types){
+        if(this.head == null) return false;
+        let iterator = this.head;
+        while(iterator != null){
+            if(iterator.name == name && types.indexOf(iterator.type) != -1) return true;
+            iterator = iterator.next;
+        }
+        return false;
+    }
+    getNode(name, types){
+        let iterator = this.head;
+        while(iterator != null){
+            if(iterator.name == name && types.indexOf(iterator.type) != -1) return iterator;
+            iterator = iterator.next;
+        }
+        return null;
     }
 }
 
@@ -179,7 +195,6 @@ function submitSearch(event){
         moveCommandToOtherStack(CLITextInput, afterHistory, beforeHistory);
     }else{}
 }
-alert("今日はlsコマンドに引数つけたところから")
 
 class FileSystem{
     // 対応しているコマンド
@@ -217,17 +232,15 @@ class FileSystem{
         if(parsedCLIArray[0] != "ls" && parsedCLIArray[1] == null) return {"isValid": false, "errorMessge": `${parsedCLIArray[0]} require single argument`};
         if(parsedCLIArray.length > 1 && parsedCLIArray[1].split("/").length > 1) return {"isValid": false, "errorMessage": `too deep path`};
         if(["mkdir"].indexOf(parsedCLIArray[0]) != -1){
-            if(FileSystem.existNode(fileTree.currentDir.childSinglyList, parsedCLIArray[1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
+            if(fileTree.currentDir.childSinglyList.existNode(parsedCLIArray[1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
         } else if(["touch"].indexOf(parsedCLIArray[0]) != -1){
-            if(FileSystem.existNode(fileTree.currentDir.childSinglyList, parsedCLIArray[1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
-        } else if(["cd"].indexOf(parsedCLIArray[0]) != -1){
-            if(!FileSystem.existNode(fileTree.currentDir.childSinglyList, parsedCLIArray[1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+            if(fileTree.currentDir.childSinglyList.existNode(parsedCLIArray[1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
+        } else if(["cd"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != ".."){
+            if(!fileTree.currentDir.childSinglyList.existNode(parsedCLIArray[1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
         } else if(["print", "setContent"].indexOf(parsedCLIArray[0]) != -1){
-            if(!FileSystem.existNode(fileTree.currentDir.childSinglyList, parsedCLIArray[1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
-        } else {
-            if(parsedCLIArray[1] != null){
-                if(!FileSystem.existNode(fileTree.currentDir.childSinglyList, parsedCLIArray[1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
-            }
+            if(!fileTree.currentDir.childSinglyList.existNode(parsedCLIArray[1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+        } else if(["ls"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != null){
+            if(!fileTree.currentDir.childSinglyList.existNode(parsedCLIArray[1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
         }
         return {"isValid": true, "errorMessage": ""};
     }
@@ -245,18 +258,27 @@ class FileSystem{
             case "pwd":
                 break;
             case "touch":
-                fileTree.currentDir.childSinglyList.append(new Node(parsedArray[1], 1));
-                console.log(fileTree.currentDir.childSinglyList);
+                fileTree.currentDir.childSinglyList.append(new Node(parsedArray[1], 1, fileTree.currentDir));
                 break;
             case "mkdir":
-                fileTree.currentDir.childSinglyList.append(new Node(parsedArray[1], 0));
-                console.log(fileTree.currentDir.childSinglyList);
+                fileTree.currentDir.childSinglyList.append(new Node(parsedArray[1], 0, fileTree.currentDir));
                 break;
             case "ls":
-                console.log("fjdlsfa");
-                if(parsedArray[1] == null) return fileTree.currentDir.childSinglyList.printList();
+                if(parsedArray[1] == null){
+                    return fileTree.currentDir.childSinglyList.printList();
+                }else{
+                    let node = fileTree.currentDir.childSinglyList.getNode(parsedArray[1], [0,1]);
+                    if(node.getType = "dir") return node.childSinglyList.printList();
+                    else return node.name;
+                }
                 break;
             case "cd":
+                if(parsedArray[1] == ".."){
+                    if(fileTree.currentDir.parentNode != null) fileTree.currentDir = fileTree.currentDir.parentNode;
+                }else{
+                    let currentDir = fileTree.currentDir.childSinglyList.getNode(parsedArray[1], [0]);
+                    if(currentDir != null) fileTree.currentDir = currentDir;
+                }
                 break;
             case "print":
                 break;
