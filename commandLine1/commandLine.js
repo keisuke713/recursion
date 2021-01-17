@@ -32,12 +32,35 @@ class FileTree{
         this.rootDir = new Node("root", 0, null);
         this.currentDir = this.rootDir;
     }
+    getPathToCurrentDir(){
+        return this.getPathToCurrentDirHelper(this.currentDir, [this.currentDir.name]);
+    }
+    getPathToCurrentDirHelper(target, result){
+        if(target.parentNode == null) return result;
+
+        let queue = [];
+        queue.push(this.rootDir);
+
+        while(queue.length > 0){
+            let node = queue.shift();
+            if(node == target.parentNode){
+                result.unshift(node.name);
+                return this.getPathToCurrentDirHelper(node, result);
+            }
+
+            let iterator = node.childSinglyList.head;
+            while(iterator != null){
+                queue.push(iterator);
+                iterator = iterator.next;
+            }
+        }
+        return result;
+    }
 }
 
 // フォルダかファイルのインスタンスを作成
 class Node{
     static type = {0: "dir", 1: "file"};
-    // インスタンス変数
     // name フォルダorファイルの名前
     // type フォルダかファイル
     // dateModified 更新日
@@ -50,14 +73,27 @@ class Node{
         this.type = type;
         this.dateModified = new Date();
         this.next = null;
-        // this.path = [];
         this.parentNode = parentNode;
         this.childSinglyList = new SinglyList();
         this.content = null;
     }
-
     getType(){
         return Node.type[this.type];
+    }
+    append(node){
+        this.childSinglyList.append(node);
+    }
+    removeAt(name){
+        this.childSinglyList.removeAt(name);
+    }
+    printList(){
+        return this.childSinglyList.printList();
+    }
+    existNode(name, types){
+        return this.childSinglyList.existNode(name, types);
+    }
+    getNode(name, types){
+        return this.childSinglyList.getNode(name, types);
     }
 }
 
@@ -77,16 +113,15 @@ class SinglyList{
         }
         iterator.next = node;
     }
-    removeAt(nodeName){
+    removeAt(name){
         if(this.head == null) return;
-        let prevIterator = this.head;
+        let prevIterator = null;
         let currIterator = this.head;
 
-        while(prevIterator != null && currIterator != null){
-            if(currIterator.name == nodeName){
-                if(prevIterator == this.head) this.head = currIterator.next;
+        while(currIterator != null){
+            if(currIterator.name == name){
+                if(prevIterator == null) this.head = currIterator.next;
                 else prevIterator.next = currIterator.next;
-                return;
             }
             prevIterator = currIterator;
             currIterator = currIterator.next;
@@ -198,7 +233,7 @@ function submitSearch(event){
 
 class FileSystem{
     // 対応しているコマンド
-    static commands = ["touch", "mkdir", "print", "pwd", "ls", "setContent", "rm", "cd"];
+    static commands = ["touch", "mkdir", "cat", "pwd", "ls", "setContent", "rm", "cd"];
 
     // 入力された文字列をコマンド名、引数にして返す
     static commandLineParser(CLIInputString){
@@ -223,24 +258,24 @@ class FileSystem{
 
     // 引数を取らないls,pwdコマンドのバリデーション
     static noArgValidator(parsedCLIArray){
-        if(parsedCLIArray.length > 0) return {"isValid": false, "errorMessage": `${parsedCLIArray[0]} needs no argument`};
+        if(parsedCLIArray.length > 1) return {"isValid": false, "errorMessage": `${parsedCLIArray[0]} needs no argument`};
         return {"isValid": true, "errorMessage": ""};
     }
 
-    // 引数を一つ取るコマンドのバリデーション
+    // 引数を一つ以上取るコマンドのバリデーション
     static singleArgValidator(parsedCLIArray){
         if(parsedCLIArray[0] != "ls" && parsedCLIArray[1] == null) return {"isValid": false, "errorMessge": `${parsedCLIArray[0]} require single argument`};
         if(parsedCLIArray.length > 1 && parsedCLIArray[1].split("/").length > 1) return {"isValid": false, "errorMessage": `too deep path`};
         if(["mkdir"].indexOf(parsedCLIArray[0]) != -1){
-            if(fileTree.currentDir.childSinglyList.existNode(parsedCLIArray[1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
+            if(fileTree.currentDir.existNode(parsedCLIArray[1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
         } else if(["touch"].indexOf(parsedCLIArray[0]) != -1){
-            if(fileTree.currentDir.childSinglyList.existNode(parsedCLIArray[1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
+            if(fileTree.currentDir.existNode(parsedCLIArray[1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
         } else if(["cd"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != ".."){
-            if(!fileTree.currentDir.childSinglyList.existNode(parsedCLIArray[1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
-        } else if(["print", "setContent"].indexOf(parsedCLIArray[0]) != -1){
-            if(!fileTree.currentDir.childSinglyList.existNode(parsedCLIArray[1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
-        } else if(["ls"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != null){
-            if(!fileTree.currentDir.childSinglyList.existNode(parsedCLIArray[1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+            if(!fileTree.currentDir.existNode(parsedCLIArray[1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+        } else if(["cat", "setContent"].indexOf(parsedCLIArray[0]) != -1){
+            if(!fileTree.currentDir.existNode(parsedCLIArray[1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+        } else if((["ls"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != null) || ["rm"].indexOf(parsedCLIArray[0]) != -1){
+            if(!fileTree.currentDir.existNode(parsedCLIArray[1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
         }
         return {"isValid": true, "errorMessage": ""};
     }
@@ -256,50 +291,44 @@ class FileSystem{
         let command = parsedArray[0];
         switch(command){
             case "pwd":
+                return fileTree.getPathToCurrentDir().join("/");
                 break;
             case "touch":
-                fileTree.currentDir.childSinglyList.append(new Node(parsedArray[1], 1, fileTree.currentDir));
+                fileTree.currentDir.append(new Node(parsedArray[1], 1, fileTree.currentDir));
                 break;
             case "mkdir":
-                fileTree.currentDir.childSinglyList.append(new Node(parsedArray[1], 0, fileTree.currentDir));
+                fileTree.currentDir.append(new Node(parsedArray[1], 0, fileTree.currentDir));
                 break;
             case "ls":
                 if(parsedArray[1] == null){
-                    return fileTree.currentDir.childSinglyList.printList();
+                    return fileTree.currentDir.printList();
                 }else{
-                    let node = fileTree.currentDir.childSinglyList.getNode(parsedArray[1], [0,1]);
-                    if(node.getType = "dir") return node.childSinglyList.printList();
+                    let node = fileTree.currentDir.getNode(parsedArray[1], [0,1]);
+                    if(node.getType = "dir") return node.printList();
                     else return node.name;
                 }
                 break;
             case "cd":
-                if(parsedArray[1] == ".."){
-                    if(fileTree.currentDir.parentNode != null) fileTree.currentDir = fileTree.currentDir.parentNode;
+                if(parsedArray[1] == ".." && fileTree.currentDir.parentNode != null){
+                    fileTree.currentDir = fileTree.currentDir.parentNode;
                 }else{
-                    let currentDir = fileTree.currentDir.childSinglyList.getNode(parsedArray[1], [0]);
+                    let currentDir = fileTree.currentDir.getNode(parsedArray[1], [0]);
                     if(currentDir != null) fileTree.currentDir = currentDir;
                 }
                 break;
-            case "print":
+            case "cat":
+                return fileTree.currentDir.getNode(parsedArray[1], [1]).content;
                 break;
             case "rm":
+                fileTree.currentDir.removeAt(parsedArray[1]);
                 break;
             case "setContent":
+                fileTree.currentDir.getNode(parsedArray[1], [1]).content = parsedArray[2];
                 break;
             default:
                 console.log(`${command} doesn't unsupported`);
         }
-        return "";
-    }
-
-    static existNode(singlyList, name, types){
-        if(singlyList.head == null) return false;
-        let iterator = singlyList.head;
-        while(iterator != null){
-            if(iterator.name == name && types.indexOf(iterator.type) != -1) return true;
-            iterator = iterator.next;
-        }
-        return false;
+        return `${parsedArray[0]} is done`;
     }
 
     // 入力されたコマンドを履歴として表示
