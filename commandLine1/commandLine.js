@@ -59,7 +59,7 @@ class FileTree{
 
     // 指定されたパスが正しいか確認(相対パスなら無条件でtrue)
     existPath(paths){
-        if(paths.length < 2) return true;
+        if(paths.length < 2 && paths[0] != "root") return true;
 
         let iterator = this.rootDir;
         if(iterator.name != paths[0]) return false;
@@ -75,7 +75,7 @@ class FileTree{
 
     // 指定されたパスの親ノードを取得
     getNodefromPath(paths){
-        if(paths.length < 2) return this.currentDir;
+        if(paths.length < 2 && paths[0] != "root") return this.currentDir;
 
         let iterator = this.rootDir;
         if(iterator.name != paths[0]) return null;
@@ -314,7 +314,7 @@ class FileSystem{
             if(parentNode.existNode(paths[paths.length - 1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
         } else if(["touch"].indexOf(parsedCLIArray[0]) != -1){
             if(parentNode.existNode(paths[paths.length - 1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
-        } else if(["cd"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != ".."){
+        } else if(["cd"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != ".." && paths[0] != "root"){
             if(!parentNode.existNode(paths[paths.length - 1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
         } else if(["cat", "setContent"].indexOf(parsedCLIArray[0]) != -1){
             if(!parentNode.existNode(paths[paths.length - 1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
@@ -358,9 +358,9 @@ class FileSystem{
                 if(parsedArray[1] == ".." && fileTree.currentDir.parentNode != null){
                     fileTree.currentDir = fileTree.currentDir.parentNode;
                 }else{
-                    debugger;
                     let currentDir = parentNode.getNode(paths[paths.length-1], [0]);
                     if(currentDir != null) fileTree.currentDir = currentDir;
+                    else fileTree.currentDir = parentNode;
                 }
                 break;
             case "cat":
