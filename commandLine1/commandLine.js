@@ -74,7 +74,7 @@ class FileTree{
     }
 
     // 指定されたパスの親ノードを取得
-    getNodefromPath(paths){
+    getNodeFromPath(paths){
         if(paths.length < 2 && paths[0] != "root") return this.currentDir;
 
         let iterator = this.rootDir;
@@ -249,7 +249,7 @@ function submitSearch(event){
             CLIOutputDiv.scrollTop = CLIOutputDiv.scrollHeight;
             return;
         }
-        if(["setContent"].indexOf(parsedCLIArray[0]) != -1) validateResponse = FileSystem.doubleArgValidator(parsedCLIArray);
+        if(["setContent", "mv"].indexOf(parsedCLIArray[0]) != -1) validateResponse = FileSystem.doubleArgValidator(parsedCLIArray);
         if(!validateResponse["isValid"]){
             FileSystem.appendErrorParagraph(CLIOutputDiv, validateResponse["errorMessage"]);
             CLIOutputDiv.scrollTop = CLIOutputDiv.scrollHeight;
@@ -267,7 +267,7 @@ function submitSearch(event){
 
 class FileSystem{
     // 対応しているコマンド
-    static commands = ["touch", "mkdir", "cat", "pwd", "ls", "setContent", "rm", "cd"];
+    static commands = ["touch", "mkdir", "cat", "pwd", "ls", "setContent", "rm", "cd", "mv"];
 
     // 入力された文字列をコマンド名、引数にして返す
     static commandLineParser(CLIInputString){
@@ -308,7 +308,7 @@ class FileSystem{
         if(parsedCLIArray[0] != "ls" && parsedCLIArray[1] == null) return {"isValid": false, "errorMessage": `${parsedCLIArray[0]} require single argument`};
         if(!fileTree.existPath(paths)) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
 
-        let parentNode = fileTree.getNodefromPath(paths);
+        let parentNode = fileTree.getNodeFromPath(paths);
 
         if(["mkdir"].indexOf(parsedCLIArray[0]) != -1){
             if(parentNode.existNode(paths[paths.length - 1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
@@ -319,6 +319,8 @@ class FileSystem{
         } else if(["cat", "setContent"].indexOf(parsedCLIArray[0]) != -1){
             if(!parentNode.existNode(paths[paths.length - 1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
         } else if((["ls"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != null) || ["rm"].indexOf(parsedCLIArray[0]) != -1){
+            if(!parentNode.existNode(paths[paths.length - 1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+        } else if(["mv"].indexOf(parsedCLIArray[0]) != -1){
             if(!parentNode.existNode(paths[paths.length - 1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
         }
         return {"isValid": true, "errorMessage": ""};
@@ -333,7 +335,7 @@ class FileSystem{
     // 入力された文字列をもとに処理を実行
     static executeCommand(parsedArray, paths){
         let command = parsedArray[0];
-        let parentNode = fileTree.getNodefromPath(paths);
+        let parentNode = fileTree.getNodeFromPath(paths);
 
         switch(command){
             case "pwd":
@@ -371,6 +373,20 @@ class FileSystem{
                 break;
             case "setContent":
                 parentNode.getNode(paths[paths.length-1], [1]).content = parsedArray[2];
+                break;
+            case "mv":
+                let node = parentNode.getNode(paths[paths.length-1], [0,1]);
+                let distinationPath = FileSystem.getPathArr(parsedArray[2]);
+
+                parentNode.removeAt(node.name);
+                let distinationParentNode = fileTree.getNodeFromPath(distinationPath);
+                if(distinationParentNode == null){
+                    parentNode.append(node);
+                    return `${parsedArray[2]} contains ${parsedArray[1]}`;
+                }
+                if(node.name != distinationPath[distinationPath.length - 1]) node.name = distinationPath[distinationPath.length - 1];
+                distinationParentNode.append(node);
+
                 break;
             default:
                 console.log(`${command} doesn't unsupported`);
