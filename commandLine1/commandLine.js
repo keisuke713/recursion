@@ -121,6 +121,9 @@ class Node{
     printList(){
         return this.childSinglyList.printList();
     }
+    reversePrintList(){
+        return this.childSinglyList.reversePrintList();
+    }
     existNode(name, types){
         return this.childSinglyList.existNode(name, types);
     }
@@ -185,6 +188,15 @@ class SinglyList{
             iterator = iterator.next;
         }
         return null;
+    }
+    reversePrintList(){
+        let result = "";
+        let iterator = this.head;
+        while(iterator != null){
+            result = `${iterator.name} ` + result;
+            iterator = iterator.next;
+        }
+        return result;
     }
 }
 
@@ -357,10 +369,24 @@ class FileSystem{
             case "ls":
                 if(parsedArray[1] == null){
                     return parentNode.printList();
-                }else{
+                }else if(FileSystem.lsOptions.indexOf(paths[paths.length-1]) == -1){
                     let node = parentNode.getNode(paths[paths.length-1], [0,1]);
-                    if(node.getType = "dir") return node.printList();
-                    else return node.name;
+                    let option = parsedArray[2];
+
+                    if(node.getType() == "dir"){
+                        if(option == null) return node.printList();
+                        else if(option == "-r") return node.reversePrintList();
+                        else if(option == "-a") return "to do"
+                    }else{
+                        return node.name;
+                    }
+                }else{
+                    let option = parsedArray[1];
+
+                    if(option == "-r"){
+                        return parentNode.reversePrintList();
+                    } else if(option == "-a"){
+                    } else{}
                 }
                 break;
             case "cd":
