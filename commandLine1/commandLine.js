@@ -249,7 +249,12 @@ function submitSearch(event){
             CLIOutputDiv.scrollTop = CLIOutputDiv.scrollHeight;
             return;
         }
-        if(["setContent", "mv"].indexOf(parsedCLIArray[0]) != -1) validateResponse = FileSystem.doubleArgValidator(parsedCLIArray);
+        if(["touch", "mkdir", "cat", "ls", "cd"].indexOf(parsedCLIArray[0]) && parsedCLIArray[2] != null){
+            FileSystem.appendErrorParagraph(CLIOutputDiv, `${parsedCLIArray[0]} doesn't require double argument`);
+            CLIOutputDiv.scrollTop = CLIOutputDiv.scrollHeight;
+            return;
+        }
+        validateResponse = FileSystem.doubleArgValidator(parsedCLIArray);
         if(!validateResponse["isValid"]){
             FileSystem.appendErrorParagraph(CLIOutputDiv, validateResponse["errorMessage"]);
             CLIOutputDiv.scrollTop = CLIOutputDiv.scrollHeight;
@@ -305,7 +310,7 @@ class FileSystem{
 
     // 引数を一つ以上取るコマンドのバリデーション
     static singleArgValidator(parsedCLIArray, paths){
-        if(parsedCLIArray[0] != "ls" && parsedCLIArray[1] == null) return {"isValid": false, "errorMessage": `${parsedCLIArray[0]} require single argument`};
+        if(["ls"].indexOf(parsedCLIArray[0]) == -1 && parsedCLIArray[1] == null) return {"isValid": false, "errorMessage": `${parsedCLIArray[0]} require single argument`};
         if(!fileTree.existPath(paths)) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
 
         let parentNode = fileTree.getNodeFromPath(paths);
@@ -327,7 +332,9 @@ class FileSystem{
 
     // 引数を二つ取るコマンドのバリデーション
     static doubleArgValidator(parsedCLIArray){
-        if(parsedCLIArray[2] == null) return {"isValid": false, errorMessage: `${parsedCLIArray[0]} require two argument`};
+        if(["setContent", "mv", "cp"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[2] == null) return {"isValid": false, errorMessage: `${parsedCLIArray[0]} require two argument`};
+        if(["touch", "mkdir", "cat", "pwd", "ls", "rm", "cd"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[2] != null) return {"isValid": false, errorMessage: `${parsedCLIArray[0]} doesn't require two argument`};
+
         return {"isValid": true, "errorMessage": ""};
     }
 
