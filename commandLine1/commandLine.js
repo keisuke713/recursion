@@ -100,14 +100,14 @@ class Node{
     // path 絶対ぱす
     // childSinglyList 子階層(フォルダのみ)
     // content　中身(ファイルのみ)
-    constructor(name, type, parentNode){
+    constructor(name, type, parentNode, content){
         this.name = name;
         this.type = type;
         this.dateModified = new Date();
         this.next = null;
         this.parentNode = parentNode;
         this.childSinglyList = new SinglyList();
-        this.content = null;
+        this.content = content;
     }
     getType(){
         return Node.type[this.type];
@@ -267,7 +267,7 @@ function submitSearch(event){
 
 class FileSystem{
     // 対応しているコマンド
-    static commands = ["touch", "mkdir", "cat", "pwd", "ls", "setContent", "rm", "cd", "mv"];
+    static commands = ["touch", "mkdir", "cat", "pwd", "ls", "setContent", "rm", "cd", "mv", "cp"];
 
     // 入力された文字列をコマンド名、引数にして返す
     static commandLineParser(CLIInputString){
@@ -318,10 +318,9 @@ class FileSystem{
             if(!parentNode.existNode(paths[paths.length - 1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
         } else if(["cat", "setContent"].indexOf(parsedCLIArray[0]) != -1){
             if(!parentNode.existNode(paths[paths.length - 1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
-        } else if((["ls"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != null) || ["rm"].indexOf(parsedCLIArray[0]) != -1){
+        } else if((["ls", "mv", "cp"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != null) || ["rm"].indexOf(parsedCLIArray[0]) != -1){
             if(!parentNode.existNode(paths[paths.length - 1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
-        } else if(["mv"].indexOf(parsedCLIArray[0]) != -1){
-            if(!parentNode.existNode(paths[paths.length - 1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+        } else {
         }
         return {"isValid": true, "errorMessage": ""};
     }
@@ -374,7 +373,7 @@ class FileSystem{
             case "setContent":
                 parentNode.getNode(paths[paths.length-1], [1]).content = parsedArray[2];
                 break;
-            case "mv":
+            case "mv": {
                 let node = parentNode.getNode(paths[paths.length-1], [0,1]);
                 let distinationPath = FileSystem.getPathArr(parsedArray[2]);
 
@@ -388,6 +387,16 @@ class FileSystem{
                 distinationParentNode.append(node);
 
                 break;
+            }
+            case "cp": {
+                let node = parentNode.getNode(paths[paths.length-1], [0,1]);
+                let distinationPath = FileSystem.getPathArr(parsedArray[2]);
+                let distinationParentNode = fileTree.getNodeFromPath(distinationPath);
+                let newNode = new Node(distinationPath[distinationPath.length-1], node.type, distinationParentNode, node.content);
+                newNode.childSinglyList = FileSystem.cpSinglyList(node.childSinglyList, newNode);
+                distinationParentNode.append(newNode);
+                break;
+            }
             default:
                 console.log(`${command} doesn't unsupported`);
         }
@@ -433,5 +442,21 @@ class FileSystem{
                     <span style='color: ${promptColor}'>${promptName}</span>: ${message}
                 </p>`;
         return;
+    }
+
+    static cpSinglyList(originalSinglyList, parentNode){
+        let singlyList = new SinglyList();
+        return FileSystem.cpSinglyListHelper(originalSinglyList, singlyList, parentNode);
+    }
+
+    static cpSinglyListHelper(originalSinglyList, singlyList, parentNode){
+        let iterator = originalSinglyList.head;
+        while(iterator != null){
+            let newNode = new Node(iterator.name, iterator.type, parentNode, iterator.content);
+            newNode.childSinglyList = FileSystem.cpSinglyListHelper(iterator.childSinglyList, new SinglyList(), newNode);
+            singlyList.append(newNode);
+            iterator = iterator.next;
+        }
+        return singlyList;
     }
 }
