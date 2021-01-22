@@ -249,11 +249,6 @@ function submitSearch(event){
             CLIOutputDiv.scrollTop = CLIOutputDiv.scrollHeight;
             return;
         }
-        if(["touch", "mkdir", "cat", "ls", "cd"].indexOf(parsedCLIArray[0]) && parsedCLIArray[2] != null){
-            FileSystem.appendErrorParagraph(CLIOutputDiv, `${parsedCLIArray[0]} doesn't require double argument`);
-            CLIOutputDiv.scrollTop = CLIOutputDiv.scrollHeight;
-            return;
-        }
         validateResponse = FileSystem.doubleArgValidator(parsedCLIArray);
         if(!validateResponse["isValid"]){
             FileSystem.appendErrorParagraph(CLIOutputDiv, validateResponse["errorMessage"]);
@@ -273,6 +268,8 @@ function submitSearch(event){
 class FileSystem{
     // 対応しているコマンド
     static commands = ["touch", "mkdir", "cat", "pwd", "ls", "setContent", "rm", "cd", "mv", "cp"];
+    // lsコマンドの対応しているオプション
+    static lsOptions = ["-r", "-a"];
 
     // 入力された文字列をコマンド名、引数にして返す
     static commandLineParser(CLIInputString){
@@ -297,9 +294,9 @@ class FileSystem{
     // 全コマンド共通バリデーション
     // コマンド、引数以外入力していないか、サポートしているコマンド以外を入力していないかを確認
     static universalValidator(parsedArray){
-        if(parsedArray.length > 3) return {isValid: false, errorMessage: "too much arguments"};
-        if(FileSystem.commands.indexOf(parsedArray[0]) == -1) return {isValid: false, errorMessage: `${parsedArray[0]} does not exist`};
-        return {isValid: true, errorMessage: ""};
+        if(parsedArray.length > 3) return {"isValid": false, "errorMessage": "too much arguments"};
+        if(FileSystem.commands.indexOf(parsedArray[0]) == -1) return {"isValid": false, "errorMessage": `${parsedArray[0]} does not exist`};
+        return {"isValid": true, "errorMessage": ""};
     }
 
     // 引数を取らないls,pwdコマンドのバリデーション
@@ -323,17 +320,21 @@ class FileSystem{
             if(!parentNode.existNode(paths[paths.length - 1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
         } else if(["cat", "setContent"].indexOf(parsedCLIArray[0]) != -1){
             if(!parentNode.existNode(paths[paths.length - 1], [1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
-        } else if((["ls", "mv", "cp"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != null) || ["rm"].indexOf(parsedCLIArray[0]) != -1){
+        } else if(["mv", "cp", "rm"].indexOf(parsedCLIArray[0]) != -1){
             if(!parentNode.existNode(paths[paths.length - 1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
-        } else {
-        }
+        } else if(["ls"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[1] != null && parsedCLIArray[2] != null){
+            if(!parentNode.existNode(paths[paths.length - 1], [0,1])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
+        } else {}
         return {"isValid": true, "errorMessage": ""};
     }
 
     // 引数を二つ取るコマンドのバリデーション
     static doubleArgValidator(parsedCLIArray){
-        if(["setContent", "mv", "cp"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[2] == null) return {"isValid": false, errorMessage: `${parsedCLIArray[0]} require two argument`};
-        if(["touch", "mkdir", "cat", "pwd", "ls", "rm", "cd"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[2] != null) return {"isValid": false, errorMessage: `${parsedCLIArray[0]} doesn't require two argument`};
+        if(["setContent", "mv", "cp"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[2] == null) return {"isValid": false, "errorMessage": `${parsedCLIArray[0]} require two argument`};
+        if(["touch", "mkdir", "cat", "pwd", "rm", "cd"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[2] != null) return {"isValid": false, "errorMessage": `${parsedCLIArray[0]} doesn't require two argument`};
+        if(["ls"].indexOf(parsedCLIArray[0]) != -1 && parsedCLIArray[2] != null) {
+            if(FileSystem.lsOptions.indexOf(parsedCLIArray[2]) == -1) return {"isValid": false, "errorMessage": `${parsedCLIArray[2]} isn't supported`};
+        }
 
         return {"isValid": true, "errorMessage": ""};
     }
