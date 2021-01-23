@@ -100,6 +100,7 @@ class Node{
     // path 絶対ぱす
     // childSinglyList 子階層(フォルダのみ)
     // content　中身(ファイルのみ)
+    // hiddenStatus 隠しファイルの場合1,　違う場合0
     constructor(name, type, parentNode, content){
         this.name = name;
         this.type = type;
@@ -108,6 +109,7 @@ class Node{
         this.parentNode = parentNode;
         this.childSinglyList = new SinglyList();
         this.content = content;
+        this.hiddenStatus = this.setHiddenStatus();
     }
     getType(){
         return Node.type[this.type];
@@ -119,16 +121,22 @@ class Node{
         this.childSinglyList.removeAt(name);
     }
     printList(){
-        return this.childSinglyList.printList();
+        return this.childSinglyList.printList(args);
     }
     reversePrintList(){
-        return this.childSinglyList.reversePrintList();
+        return this.childSinglyList.reversePrintList(args);
     }
     existNode(name, types){
         return this.childSinglyList.existNode(name, types);
     }
     getNode(name, types){
         return this.childSinglyList.getNode(name, types);
+    }
+    setHiddenStatus(){
+        return this.name.substring(0,1) == "." ? 1 : 0;
+    }
+    isHidden(){
+        return this.hiddenStatus == 1 ? true : false;
     }
 }
 
@@ -172,6 +180,15 @@ class SinglyList{
         }
         return result;
     }
+    reversePrintList(){
+        let result = "";
+        let iterator = this.head;
+        while(iterator != null){
+            result = `${iterator.name} ` + result;
+            iterator = iterator.next;
+        }
+        return result;
+    }
     existNode(name, types){
         if(this.head == null) return false;
         let iterator = this.head;
@@ -188,15 +205,6 @@ class SinglyList{
             iterator = iterator.next;
         }
         return null;
-    }
-    reversePrintList(){
-        let result = "";
-        let iterator = this.head;
-        while(iterator != null){
-            result = `${iterator.name} ` + result;
-            iterator = iterator.next;
-        }
-        return result;
     }
 }
 
@@ -373,13 +381,10 @@ class FileSystem{
                     let node = parentNode.getNode(paths[paths.length-1], [0,1]);
                     let option = parsedArray[2];
 
-                    if(node.getType() == "dir"){
-                        if(option == null) return node.printList();
-                        else if(option == "-r") return node.reversePrintList();
-                        else if(option == "-a") return "to do"
-                    }else{
-                        return node.name;
-                    }
+                    if(node.getType() == "file") return node.name;
+                    if(option == null) return node.printList(1);
+                    else if(option == "-r") return node.reversePrintList();
+                    else if(option == "-a") return "to do"
                 }else{
                     let option = parsedArray[1];
 
