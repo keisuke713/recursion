@@ -120,11 +120,11 @@ class Node{
     removeAt(name){
         this.childSinglyList.removeAt(name);
     }
-    printList(){
+    printList(...args){
         return this.childSinglyList.printList(args);
     }
     reversePrintList(){
-        return this.childSinglyList.reversePrintList(args);
+        return this.childSinglyList.reversePrintList();
     }
     existNode(name, types){
         return this.childSinglyList.existNode(name, types);
@@ -170,12 +170,26 @@ class SinglyList{
             currIterator = currIterator.next;
         } 
     }
-    printList(){
+    printList(...args){
+        if(args.length == 0 || args[0].length == 0 || args[0][0]["includeHiddenFile"] == undefined || !args[0][0]["includeHiddenFile"]) return this.printListExcludeHiddenFile();
+        return this.printListIncludeHiddenFile();
+    }
+    printListIncludeHiddenFile(){
         let result = "";
 
         let iterator = this.head;
         while(iterator != null){
             result += `${iterator.name} `;
+            iterator = iterator.next;
+        }
+        return result;
+    }
+    printListExcludeHiddenFile(){
+        let result = "";
+
+        let iterator = this.head;
+        while(iterator != null){
+            if(!iterator.isHidden()) result += `${iterator.name} `;
             iterator = iterator.next;
         }
         return result;
@@ -379,18 +393,20 @@ class FileSystem{
                     return parentNode.printList();
                 }else if(FileSystem.lsOptions.indexOf(paths[paths.length-1]) == -1){
                     let node = parentNode.getNode(paths[paths.length-1], [0,1]);
+                    if(node == null) node = fileTree.currentDir;
                     let option = parsedArray[2];
 
                     if(node.getType() == "file") return node.name;
-                    if(option == null) return node.printList(1);
+                    if(option == null) return node.printList();
                     else if(option == "-r") return node.reversePrintList();
-                    else if(option == "-a") return "to do"
+                    else if(option == "-a") return node.printList({"includeHiddenFile": true});
                 }else{
                     let option = parsedArray[1];
 
                     if(option == "-r"){
                         return parentNode.reversePrintList();
                     } else if(option == "-a"){
+                        return parentNode.printList({"includeHiddenFile": true});
                     } else{}
                 }
                 break;
