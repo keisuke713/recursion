@@ -325,6 +325,7 @@ class FileSystem{
         if(["ls"].indexOf(parsedCLIArray[0]) == -1 && parsedCLIArray[1] == null) return {"isValid": false, "errorMessage": `${parsedCLIArray[0]} require single argument`};
 
         let parentNode = fileTree.getNodeFromPath(paths);
+        if(parentNode == null) return {"isValid": false, "errorMessage": "incorrect argument"};
 
         if(["mkdir"].indexOf(parsedCLIArray[0]) != -1){
             if(parentNode.existNode(paths[paths.length - 1], [0])) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} already exists`};
