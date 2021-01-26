@@ -57,30 +57,11 @@ class FileTree{
         return result;
     }
 
-    // 指定されたパスが正しいか確認(相対パスなら無条件でtrue)
-    existPath(paths){
-        if(paths.length < 2 && paths[0] != "root") return true;
-
-        let iterator = this.rootDir;
-        if(iterator.name != paths[0]) return false;
-
-        let i = 1;
-        while(i < paths.length - 1){
-            if(!iterator.existNode(paths[i], [0])) return false;
-            iterator = iterator.getNode(paths[i], [0]);
-            i++;
-        }
-        return true;
-    }
-
     // 指定されたパスの親ノードを取得
     getNodeFromPath(paths){
-        if(paths.length < 2 && paths[0] != "root") return this.currentDir;
+        let iterator = paths[0] == "root" ? this.rootDir : this.currentDir;
+        let i = paths[0] == "root" ? 1 : 0;
 
-        let iterator = this.rootDir;
-        if(iterator.name != paths[0]) return null;
-
-        let i = 1;
         while(i < paths.length - 1){
             if(!iterator.getNode(paths[i], [0])) return null;
             iterator = iterator.getNode(paths[i], [0]);
@@ -342,7 +323,6 @@ class FileSystem{
     // 引数を一つ以上取るコマンドのバリデーション
     static singleArgValidator(parsedCLIArray, paths){
         if(["ls"].indexOf(parsedCLIArray[0]) == -1 && parsedCLIArray[1] == null) return {"isValid": false, "errorMessage": `${parsedCLIArray[0]} require single argument`};
-        if(!fileTree.existPath(paths)) return {"isValid": false, "errorMessage": `${parsedCLIArray[1]} doesn't exist`};
 
         let parentNode = fileTree.getNodeFromPath(paths);
 
