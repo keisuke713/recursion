@@ -37,20 +37,22 @@ class ViewRender{
         let container = this.createContainer("signup");
         container.innerHTML = 
         `
-        <div class="col-sm-12 col-md-12 col-lg-12">
-            <div class="col-sm-12 col-md-12 col-lg-12 text-center">
-                <h2>ログイン</h2>
-            </div>
-            <div class="col-sm-12 col-md-12 col-lg-12 text-center">
-                <form id="signup">
-                    <div class="form-group">
-                        <input type="text" name="userName" class="form-control" placeholder="ユーザーネーム" value="" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="number" name="age" class="form-control" name="userAge" placeholder="年齢" value="" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary col-12">新規登録</button>
-                </form>
+        <div class="row align-middle">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="col-sm-12 col-md-12 col-lg-12 text-center">
+                    <h2>ログイン</h2>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-12 text-center">
+                    <form id="signup">
+                        <div class="form-group">
+                            <input type="text" name="userName" class="form-control" placeholder="ユーザーネーム" value="" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" name="age" class="form-control" name="userAge" placeholder="年齢" value="" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary col-12">新規登録</button>
+                    </form>
+                </div>
             </div>
         </div>
         `
@@ -64,4 +66,4 @@ class ViewRender{
     }
 }
 
-Controller.signup();
+// Controller.signup();
