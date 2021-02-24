@@ -40,3 +40,15 @@
 .margin-top-15{
     margin-top: 15px;
 }
+
+/* userInfo */
+.user-info-row{
+    height: 45%;
+    width: 90%;
+    margin: 0 auto;
+}
+.user-info-cell{
+    display: inline-block;
+    height: 90%;
+    width: 45%;
+}
