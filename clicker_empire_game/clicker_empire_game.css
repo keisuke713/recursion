@@ -2,7 +2,6 @@
 .bg-green {
     background: #4BA3A1;
 }
-
 .bg-blue {
     background: #1A4567;
 }
@@ -23,8 +22,8 @@
 .vh-25{
     height: 25vh!important;
 }
-.vh-60{
-    height: 60vh!important;
+.vh-70{
+    height: 70vh!important;
 }
 .vh-75{
     height: 75vh!important;
