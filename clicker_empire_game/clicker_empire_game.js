@@ -48,7 +48,7 @@ class ViewRender{
                             <input type="text" name="userName" class="form-control" placeholder="ユーザーネーム" value="" required>
                         </div>
                         <div class="form-group">
-                            <input type="number" name="age" class="form-control" name="userAge" placeholder="年齢" value="" required>
+                            <input type="number" name="age" class="form-control" placeholder="年齢" value="" required>
                         </div>
                         <button type="submit" class="btn btn-primary col-12">新規登録</button>
                     </form>

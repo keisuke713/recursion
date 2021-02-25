@@ -63,3 +63,18 @@
     max-width: 80%;
     padding: 10px;
 }
+
+/* purchaseScreen */
+.purchase-screen{
+    height: 90%;
+    width: 90%;
+    margin: 0 auto;
+}
+
+/* common */
+/* 良い名前が思い浮かばなかったテヘペロ */
+.ele-center{
+    width: 90%;
+    margin: 0 auto;
+    padding-bottom: 10px;
+}
