@@ -210,6 +210,13 @@ class ViewRender{
     }
 }
 
-Controller.main();
-Controller.item();
-Controller.backMain();
+class ClickerEmpireGame{
+    static main(){
+        Controller.main();
+        Controller.item();
+        Controller.backMain();
+    }
+}
+
+ClickerEmpireGame.main();
+
