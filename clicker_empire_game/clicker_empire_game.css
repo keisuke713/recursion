@@ -51,3 +51,15 @@
     height: 90%;
     width: 45%;
 }
+
+/* itemInfo */
+.item{
+    width: 90%;
+    margin: 10px auto;
+    display: table;
+    table-layout: fixed;
+}
+.item-img{
+    max-width: 80%;
+    padding: 10px;
+}
