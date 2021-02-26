@@ -1,30 +1,58 @@
+let currentUser = null;
+
+class User{}
 class Controller{
+    // トップページ(GET)
     static start(){
         ViewRender.renderStartPage();
     }
+    // 新規登録ページ(GET)
     static signup(){
         ViewRender.renderSignUpPage();
     }
-    // mainpageへ遷移
+    // ユーザー登録(POSt)
+    static register(){
+        let userName = document.getElementById("input-user-name").value;
+        let userAge  = document.getElementById("input-user-age").value;
+
+        let response = UserValidator.validate(userName, userAge);
+        let message = "";
+        if(!response.name.valid && response.name.message.length>0) message += response.name.message;
+        if(!response.age.valid && response.age.message.length>0) message += response.age.message;
+
+        if(message.length>0){
+            alert(message);
+            return;
+        }
+        this.main();
+    }
+    // mainpageへ遷移(GET)
     // target以下のinnerHtmlを全替え
     static main(){
+        if(!this.#isUserPresent()){
+            this.start();
+            return;
+        }
         ViewRender.renderMainPage()
     }
-    // itemへ選択したpageへ遷移
+    // itemへ選択したpageへ遷移(GET)
     // idを引数として受け取り対象のitemを取得してその情報をレンダリング
     // mainpageの一部のみ書き換える
     static item(){
         ViewRender.renderItemPage();
     }
-    // itemを購入せずバックする時に使う
+    // itemを購入せずバックする時に使う(GET?)
     // mainpageの一部を書き換える
     static backMain(){
         ViewRender.renderItemsPage();
     }
-    // userのitemリストに購入したitemを加える
+    // userのitemリストに購入したitemを加える(POST)
     // mainpageの一部のみ書き換える
     static purchase(){
         ViewRender.renderItemsPage();
+    }
+    static #isUserPresent(){
+        return currentUser != null;
     }
 }
 class ViewRender{
@@ -39,6 +67,7 @@ class ViewRender{
         this.target.append(this.#createSignUpPage());
     }
     static renderMainPage(){
+        this.target.innerHTML = null;
         this.target.append(this.#createMainPage());
     }
     static renderItemsPage(){
@@ -85,12 +114,12 @@ class ViewRender{
                 <div class="col-sm-12 col-md-12 col-lg-12 text-center">
                     <form id="signup">
                         <div class="form-group">
-                            <input type="text" name="userName" class="form-control" placeholder="ユーザーネーム" value="" required>
+                            <input type="text" name="userName" class="form-control" id="input-user-name" placeholder="ユーザーネーム" value="">
                         </div>
                         <div class="form-group">
-                            <input type="number" name="age" class="form-control" placeholder="年齢" value="" required>
+                            <input type="number" name="userAge" class="form-control" id="input-user-age" placeholder="年齢" value="">
                         </div>
-                        <button type="submit" class="btn btn-primary col-12">新規登録</button>
+                        <button type="submit" class="btn btn-primary col-12" onclick='Controller.register()'>新規登録</button>
                     </form>
                 </div>
             </div>
@@ -209,6 +238,25 @@ class ViewRender{
         container.classList.add("container");
         container.setAttribute("id", id);
         return container;
+    }
+}
+
+class UserValidator{
+    static validate(name, age){
+        let response = {name:{valid:true, message:""}, age:{valid:true, message:""}};
+        if(name.length<=0){
+            response.name.valid = false;
+            response.name.message = "名前を入力してください";
+        }
+        if(age.length<=0){
+            response.age.valid = false;
+            response.age.message = "年齢を入力してください";
+        }
+        if(Number(age)<0){
+            response.age.valid = false;
+            response.age.message = "0歳以上の年齢を入力してください";
+        }
+        return response;
     }
 }
 
