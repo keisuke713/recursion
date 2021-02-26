@@ -2,8 +2,9 @@ let currentUser = null;
 
 class User{
     constructor(name, age){
-        this.name = name;
-        this.age = age;
+        // this.name = name;
+        this.name = this.#initializedName(name);
+        this.age = this.#initializedAge(age);
         this.assets = 50000;
         this.timeKeeper = new TimeKeeper();
         // ↓どうしよう、やっぱ変えようかな
@@ -13,6 +14,16 @@ class User{
     getAmountPerClick(){}
     // 一秒経つごとに得られる金額
     getAmountPerSecond(){}
+
+    // バリデーション
+    #initializedName(name){
+        if(name.length <= 0) alert("名前決めないなら勝手に決めちゃうよ？君の名前は名無しのゴンベだ！")
+        return name.length > 0 ? name : "名前もないクズ";
+    }
+    #initializedAge(age){
+        if(age <= 0) alert("Age is just a number! Be relax!!")
+        return age > 0 ? age : 20;
+    }
 }
 class TimeKeeper{
     constructor(){
@@ -59,11 +70,6 @@ class RealEstate extends Item{
     }
 }
 
-let item = new Investment("item", 1, 1000000, 0.9);
-let hamburger = new RealEstate("hamburger",1,2);
-console.log(item.getAmountPer());
-console.log(hamburger.getAmountPer());
-
 class Controller{
     // トップページ(GET)
     static start(){
@@ -76,17 +82,9 @@ class Controller{
     // ユーザー登録(POSt)
     static register(){
         let userName = document.getElementById("input-user-name").value;
-        let userAge  = document.getElementById("input-user-age").value;
+        let userAge  = Number(document.getElementById("input-user-age").value);
 
-        let response = UserValidator.validate(userName, userAge);
-        let message = "";
-        if(!response.name.valid && response.name.message.length>0) message += response.name.message;
-        if(!response.age.valid && response.age.message.length>0) message += response.age.message;
-
-        if(message.length>0){
-            alert(message);
-            return;
-        }
+        currentUser = new User(userName, userAge);
         this.main();
     }
     // mainpageへ遷移(GET)
@@ -304,25 +302,6 @@ class ViewRender{
     }
 }
 
-class UserValidator{
-    static validate(name, age){
-        let response = {name:{valid:true, message:""}, age:{valid:true, message:""}};
-        if(name.length<=0){
-            response.name.valid = false;
-            response.name.message = "名前を入力してください";
-        }
-        if(age.length<=0){
-            response.age.valid = false;
-            response.age.message = "年齢を入力してください";
-        }
-        if(Number(age)<0){
-            response.age.valid = false;
-            response.age.message = "0歳以上の年齢を入力してください";
-        }
-        return response;
-    }
-}
-
 class ClickerEmpireGame{
     static main(){
         Controller.start();
@@ -330,4 +309,4 @@ class ClickerEmpireGame{
 }
 
 ClickerEmpireGame.main();
-alert("ユーザーとアイテムの関係性、ページにユーザーとアイテムの情報をどうリアルタイムで反映させるか");
+alert("privateにしちゃう？ユーザーとアイテムの関係性、ページにユーザーとアイテムの情報をどうリアルタイムで反映させるか");
