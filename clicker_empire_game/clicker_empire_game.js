@@ -31,9 +31,11 @@ class ViewRender{
     static target = document.getElementById("target");
 
     static renderStartPage(){
+        this.target.innerHTML = null;
         this.target.append(this.#createStartPage());
     }
     static renderSignUpPage(){
+        this.target.innerHTML = null;
         this.target.append(this.#createSignUpPage());
     }
     static renderMainPage(){
@@ -62,10 +64,10 @@ class ViewRender{
                 <h1>Clicker Empire Game</h1>
             </div>
             <div class="col-sm-6 col-md-12 col-lg-12 text-center">
-                <button type="button" class="btn btn-lg btn-primary">最初から</button>
+                <button type="button" class="btn btn-lg btn-primary" onclick='Controller.signup()'>最初から</button>
             </div>
             <div class="col-sm-6 col-md-12 col-lg-12 text-center">
-                <button type="button" class="btn btn-lg btn-primary">続きから</button>
+                <button type="button" class="btn btn-lg btn-primary" onclick='alert("coming soon")'>続きから</button>
             </div>
         </div>
         `
@@ -212,9 +214,7 @@ class ViewRender{
 
 class ClickerEmpireGame{
     static main(){
-        Controller.main();
-        Controller.item();
-        Controller.backMain();
+        Controller.start();
     }
 }
 
