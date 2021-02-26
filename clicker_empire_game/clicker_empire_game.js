@@ -6,7 +6,7 @@ class User{
         this.age = age;
         this.assets = 50000;
         this.timeKeeper = new TimeKeeper();
-        this.itemLists = new Map([[new FlipMachine(),1]]);
+        this.itemLists = new Map([[new FlipMachine("flipMachine", 500, 15000, 25),1]]);
     }
     // ハンバーガーを一回クリックするごとに得られる金額
     getAmountPerClick(){}
@@ -21,13 +21,43 @@ class TimeKeeper{
     passedOneYear(){}
 }
 class Item{
+    constructor(name, maxPurchased, price){
+        this.name = name;
+        this.maxPurchased = maxPurchased;
+        this.price = price;
+    }
+    getAmountPer(){
+        throw "You need to implement this method in child class"
+    }
 }
-class FlipMachine extends Item{}
-class Investment extends Item{}
-class RealEstate extends Item{}
+class FlipMachine extends Item{
+    constructor(name, maxPurchased, price, amount){
+        super(name, maxPurchased, price);
+        this.amount = amount;
+    }
+    getAmountPer(){
+        return this.amount;
+    }
+}
+class Investment extends Item{
+    constructor(name, maxPurchased, price, percentage){
+        super(name, maxPurchased, price);
+        this.percentage = percentage;
+    }
+    getAmountPer(){
+        return this.price * this.percentage;
+    }
+}
+class RealEstate extends Item{
+    getAmountPer(){
+        return this.price * 0.01;
+    }
+}
 
-currentUser = new User("keisuke", 24);
-console.log(currentUser);
+let item = new Investment("item", 1, 1000000, 0.9);
+let hamburger = new RealEstate("hamburger",1,2);
+console.log(item.getAmountPer());
+console.log(hamburger.getAmountPer());
 
 class Controller{
     // トップページ(GET)
