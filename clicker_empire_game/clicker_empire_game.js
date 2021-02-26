@@ -6,6 +6,7 @@ class User{
         this.age = age;
         this.assets = 50000;
         this.timeKeeper = new TimeKeeper();
+        // ↓どうしよう、やっぱ変えようかな
         this.itemLists = new Map([[new FlipMachine("flipMachine", 500, 15000, 25),1]]);
     }
     // ハンバーガーを一回クリックするごとに得られる金額
@@ -49,8 +50,12 @@ class Investment extends Item{
     }
 }
 class RealEstate extends Item{
+    constructor(name, maxPurchased, price, amount){
+        super(name, maxPurchased, price);
+        this.amount = amount;
+    }
     getAmountPer(){
-        return this.price * 0.01;
+        return this.amount;
     }
 }
 
@@ -325,4 +330,4 @@ class ClickerEmpireGame{
 }
 
 ClickerEmpireGame.main();
-
+alert("ユーザーとアイテムの関係性、ページにユーザーとアイテムの情報をどうリアルタイムで反映させるか");
