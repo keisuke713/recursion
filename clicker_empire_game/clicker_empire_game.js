@@ -2,9 +2,33 @@ let currentUser = null;
 
 class User{
     constructor(name, age){
-        return null;
+        this.name = name;
+        this.age = age;
+        this.assets = 50000;
+        this.timeKeeper = new TimeKeeper();
+        this.itemLists = new Map([[new FlipMachine(),1]]);
     }
+    // ハンバーガーを一回クリックするごとに得られる金額
+    getAmountPerClick(){}
+    // 一秒経つごとに得られる金額
+    getAmountPerSecond(){}
 }
+class TimeKeeper{
+    constructor(){
+        this.amountOfDays = 0;
+    }
+    // 1年経過したかどうか
+    passedOneYear(){}
+}
+class Item{
+}
+class FlipMachine extends Item{}
+class Investment extends Item{}
+class RealEstate extends Item{}
+
+currentUser = new User("keisuke", 24);
+console.log(currentUser);
+
 class Controller{
     // トップページ(GET)
     static start(){
