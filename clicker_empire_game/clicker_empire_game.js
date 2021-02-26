@@ -1,6 +1,10 @@
 let currentUser = null;
 
-class User{}
+class User{
+    constructor(name, age){
+        return null;
+    }
+}
 class Controller{
     // トップページ(GET)
     static start(){
@@ -119,7 +123,7 @@ class ViewRender{
                         <div class="form-group">
                             <input type="number" name="userAge" class="form-control" id="input-user-age" placeholder="年齢" value="">
                         </div>
-                        <button type="submit" class="btn btn-primary col-12" onclick='Controller.register()'>新規登録</button>
+                        <button type="submit" class="btn btn-primary col-12" onclick='Controller.register();return false;'>新規登録</button>
                     </form>
                 </div>
             </div>
