@@ -1,8 +1,6 @@
 let currentUser = null;
-
 class User{
     constructor(name, age){
-        // this.name = name;
         this.name = this.#initializedName(name);
         this.age = this.#initializedAge(age);
         this.assets = 50000;
@@ -17,11 +15,11 @@ class User{
 
     // バリデーション
     #initializedName(name){
-        if(name.length <= 0) alert("名前決めないなら勝手に決めちゃうよ？君の名前は名無しのゴンベだ！")
+        // if(name.length <= 0) alert("名前決めないなら勝手に決めちゃうよ？君の名前は名無しのゴンベだ！")
         return name.length > 0 ? name : "名前もないクズ";
     }
     #initializedAge(age){
-        if(age <= 0) alert("Age is just a number! Be relax!!")
+        // if(age <= 0) alert("Age is just a number! Be relax!!")
         return age > 0 ? age : 20;
     }
 }
@@ -309,4 +307,21 @@ class ClickerEmpireGame{
 }
 
 ClickerEmpireGame.main();
-alert("privateにしちゃう？ユーザーとアイテムの関係性、ページにユーザーとアイテムの情報をどうリアルタイムで反映させるか");
+// alert("privateにしちゃう？ユーザーとアイテムの関係性、ページにユーザーとアイテムの情報をどうリアルタイムで反映させるか");
+
+let user = new User("keisuke", 24);
+
+const itemLists = [
+    new FlipMachine("flipMachine", 500, 15000, 25),
+    new Investment("etfStock", Infinity, 300000, 0.001),
+    new Investment("etfBonds", Infinity, 300000, 0.0007),
+    new RealEstate("lemonadeStand", 1000, 30000, 30),
+    new RealEstate("iceCreamTruck", 500, 100000, 120),
+    new RealEstate("house", 100, 20000000, 32000),
+    new RealEstate("townHouse", 100, 40000000, 64000),
+    new RealEstate("mansion", 100, 250000000, 500000),
+    new RealEstate("industrialSpace", 10, 1000000000, 2200000),
+    new RealEstate("hotelSkyscraper", 5, 10000000000, 25000000),
+    new RealEstate("bulletSpeedSkyRailsway", 1, 10000000000, 39999999999)
+];
+console.log(itemLists);
