@@ -1,12 +1,14 @@
 let currentUser = null;
+let items = null;
+
 class User{
-    constructor(name, age){
+    constructor(name, age, flipMachine){
         this.name = this.#initializedName(name);
         this.age = this.#initializedAge(age);
         this.assets = 50000;
         this.timeKeeper = new TimeKeeper();
-        // ↓どうしよう、やっぱ変えようかな
-        this.itemLists = new Map([[new FlipMachine("flipMachine", 500, 15000, 25),1]]);
+        this.itemLists = [flipMachine];
+        this.eachItemsCount = new Map([[flipMachine.getType(),1]])
     }
     // ハンバーガーを一回クリックするごとに得られる金額
     getAmountPerClick(){}
@@ -31,18 +33,26 @@ class TimeKeeper{
     passedOneYear(){}
 }
 class Item{
-    constructor(name, maxPurchased, price){
-        this.name = name;
+    static types = {0:"flipMachine",1:"etcStock", 2:"etcBonds", 3:"lemonadeStand", 4:"iceCreamTruck", 5:"house", 6:"townHouse", 7:"mansion", 8:"industrialSpace", 9:"hotelSkyscraper", 10:"bulletSpeedSkyRailsway"}
+    constructor(type, maxPurchased, price){
+        this.type = this.#setType(type);
         this.maxPurchased = maxPurchased;
         this.price = price;
     }
     getAmountPer(){
-        throw "You need to implement this method in child class"
+        throw "You need to implement this method in child class";
+    }
+    getType(){
+        return Item.types[this.type];
+    }
+    #setType(type){
+        if(Item.types[type] == undefined) return 0;
+        return type;
     }
 }
 class FlipMachine extends Item{
-    constructor(name, maxPurchased, price, amount){
-        super(name, maxPurchased, price);
+    constructor(type, maxPurchased, price, amount){
+        super(type, maxPurchased, price);
         this.amount = amount;
     }
     getAmountPer(){
@@ -50,8 +60,8 @@ class FlipMachine extends Item{
     }
 }
 class Investment extends Item{
-    constructor(name, maxPurchased, price, percentage){
-        super(name, maxPurchased, price);
+    constructor(type, maxPurchased, price, percentage){
+        super(type, maxPurchased, price);
         this.percentage = percentage;
     }
     getAmountPer(){
@@ -59,12 +69,33 @@ class Investment extends Item{
     }
 }
 class RealEstate extends Item{
-    constructor(name, maxPurchased, price, amount){
-        super(name, maxPurchased, price);
+    constructor(type, maxPurchased, price, amount){
+        super(type, maxPurchased, price);
         this.amount = amount;
     }
     getAmountPer(){
         return this.amount;
+    }
+}
+class Items{
+    constructor(items){
+        this.list = this.#setItems(items);
+        // this.list = items;
+    }
+    getItem(type){
+        let result = null;
+        for(let i=0; items.length; i++){
+            if(items[i].getType() == type) return items[i];
+        }
+        return null;
+    }
+    #setItems(items){
+        let array = [];
+        for(let i=0; i<items.length; i++){
+            // if(itmes[i] instanceof Item == false) continue;
+            array.push(items[i]);
+        }
+        return array;
     }
 }
 
@@ -82,13 +113,23 @@ class Controller{
         let userName = document.getElementById("input-user-name").value;
         let userAge  = Number(document.getElementById("input-user-age").value);
 
-        currentUser = new User(userName, userAge);
+        items = new Items([
+            new FlipMachine(0, 500, 15000, 25),
+            new Investment(1, Infinity, 300000, 0.001),
+            new Investment(2, Infinity, 300000, 0.0007),
+            new RealEstate(3, 1000, 30000, 30),
+        ]);
+        // currentUser = new User(userName, userAge, items.getItems(Item.types[0]));
+        currentUser = new User(userName, userAge, new FlipMachine(0,500,15000,25));
+        console.log(currentUser);
+        console.log(items);
         this.main();
     }
     // mainpageへ遷移(GET)
     // target以下のinnerHtmlを全替え
     static main(){
         if(!this.#isUserPresent()){
+            alert("ログインしてね")
             this.start();
             return;
         }
@@ -306,22 +347,22 @@ class ClickerEmpireGame{
     }
 }
 
+// function initializeItemLists(){
+//     itemLists = [
+//         new FlipMachine(0, 500, 15000, 25),
+//         new Investment(1, Infinity, 300000, 0.001),
+//         new Investment(2, Infinity, 300000, 0.0007),
+//         new RealEstate(3, 1000, 30000, 30),
+//         new RealEstate(4, 500, 100000, 120),
+//         new RealEstate(5, 100, 20000000, 32000),
+//         new RealEstate(6, 100, 40000000, 64000),
+//         new RealEstate(7, 100, 250000000, 500000),
+//         new RealEstate(8, 10, 1000000000, 2200000),
+//         new RealEstate(9, 5, 10000000000, 25000000),
+//         new RealEstate(10, 1, 10000000000, 39999999999)
+//     ];
+//     return itemLists;
+// }
+
 ClickerEmpireGame.main();
-// alert("privateにしちゃう？ユーザーとアイテムの関係性、ページにユーザーとアイテムの情報をどうリアルタイムで反映させるか");
-
-let user = new User("keisuke", 24);
-
-const itemLists = [
-    new FlipMachine("flipMachine", 500, 15000, 25),
-    new Investment("etfStock", Infinity, 300000, 0.001),
-    new Investment("etfBonds", Infinity, 300000, 0.0007),
-    new RealEstate("lemonadeStand", 1000, 30000, 30),
-    new RealEstate("iceCreamTruck", 500, 100000, 120),
-    new RealEstate("house", 100, 20000000, 32000),
-    new RealEstate("townHouse", 100, 40000000, 64000),
-    new RealEstate("mansion", 100, 250000000, 500000),
-    new RealEstate("industrialSpace", 10, 1000000000, 2200000),
-    new RealEstate("hotelSkyscraper", 5, 10000000000, 25000000),
-    new RealEstate("bulletSpeedSkyRailsway", 1, 10000000000, 39999999999)
-];
-console.log(itemLists);
+alert("itemsの二つのメソッドが上手く起動指定あい")
