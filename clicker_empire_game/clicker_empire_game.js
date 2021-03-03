@@ -1,8 +1,18 @@
 const config = {
-    hambugerImgUrl: "https://cdn.pixabay.com/photo/2014/04/02/17/00/burger-307648_960_720.png"
+    flipMachineImgUrl: "https://cdn.pixabay.com/photo/2014/04/02/17/00/burger-307648_960_720.png",
+    etcStockImgUrl: "https://cdn.pixabay.com/photo/2016/03/31/20/51/chart-1296049_960_720.png",
+    etcBondsImgUrl: "https://cdn.pixabay.com/photo/2016/03/31/20/51/chart-1296049_960_720.png",
+    lemonadeImgUrl: "https://cdn.pixabay.com/photo/2012/04/15/20/36/juice-35236_960_720.png",
+    iceCreamImgUrl: "https://cdn.pixabay.com/photo/2020/01/30/12/37/ice-cream-4805333_960_720.png",
+    houseImgUrl: "https://cdn.pixabay.com/photo/2016/03/31/18/42/home-1294564_960_720.png",
+    townHouseImgUrl: "https://cdn.pixabay.com/photo/2019/06/15/22/30/modern-house-4276598_960_720.png",
+    mansionImgUrl: "https://cdn.pixabay.com/photo/2017/10/30/20/52/condominium-2903520_960_720.png",
+    industrialSpaceImgUrl: "https://cdn.pixabay.com/photo/2012/05/07/17/35/factory-48781_960_720.png",
+    hotelSkyscraperImgUrl: "https://cdn.pixabay.com/photo/2012/05/07/18/03/skyscrapers-48853_960_720.png",
+    bulletSpeedSkyRailswayImgUrl: "https://cdn.pixabay.com/photo/2013/07/13/10/21/train-157027_960_720.png"
 }
 let currentUser = null;
-let items = null;
+let displayedItems = null;
 
 class User{
     constructor(name, age, flipMachine){
@@ -207,15 +217,19 @@ class Items{
         this.addItemToCache(item);
     }
     addItemToList(item){
-        if(this.#isItem(item)) this.list.push(item);
+        // if(this.#isItem(item)) this.list.push(item);
+        this.#isItem(item);
+        this.list.push(item);
     }
     addItemToCache(item){
-        if(!this.#isItem(item)) return;
+        // if(!this.#isItem(item)) return;
+        this.#isItem(item);
         if(this.eachItemCount.get(item.getName())==undefined) this.eachItemCount.set(item.getName(),1);
         else this.eachItemCount.set(item.getName(), this.eachItemCount.get(item.getName())+1);
     }
     #isItem(item){
-        return item instanceof Item;
+        if(item instanceof Item == false) throw `${item} is not Item`;
+        // return item instanceof Item;
     }
 }
 
@@ -233,15 +247,9 @@ class Controller{
         let userName = document.getElementById("input-user-name").value;
         let userAge  = Number(document.getElementById("input-user-age").value);
 
-        // items = new Items([
-        //     new FlipMachine(0, 500, 15000, 25),
-        //     new Investment(1, Infinity, 300000, 0.001),
-        //     new Investment(2, Infinity, 300000, 0.0007),
-        //     new RealEstate(3, 1000, 30000, 30),
-        // ]);
         currentUser = new User(userName, userAge, new FlipMachine(config.hambugerImgUrl,500,15000,25));
-        console.log(currentUser.items);
-        console.log(currentUser.items.list[0].getName());
+        displayedItems = initializeItemLists();
+
         this.main();
     }
     // mainpageへ遷移(GET)
@@ -288,6 +296,8 @@ class ViewRender{
     static renderMainPage(){
         this.target.innerHTML = null;
         this.target.append(this.#createMainPage());
+        let itemBox = document.getElementById("item-box");
+        this.#appendItemDetail(itemBox);
     }
     static renderItemsPage(){
         let itemBox = document.getElementById("item-box");
@@ -379,18 +389,6 @@ class ViewRender{
                     </div>
                     <!-- itemlist -->
                     <div class="bg-dark vh-70" style="overflow: scroll;" id="item-box">
-                        <div class="item bg-grey">
-                            <div style="display: table-cell;">
-                                <img src="https://cdn.pixabay.com/photo/2014/04/02/17/00/burger-307648_960_720.png" class="item-img">
-                            </div>
-                            <div style="display: table-cell;">
-                                <h3>ItemName</h3>
-                                <p><span>$30,000</span><span>&nbsp;&nbsp;</span><span>+32,000</span></p>
-                            </div>
-                            <div class="text-center" style="display: table-cell; vertical-align: middle;">
-                                <h3>2</h3>
-                            </div>
-                        </div>
                     </div>
                     <div class="vh-10 text-right" style="margin-top: 10px;">
                         <button type="button" class="btn btn-lg btn-primary fa fa-repeat"></button>
@@ -458,6 +456,26 @@ class ViewRender{
         container.setAttribute("id", id);
         return container;
     }
+    static #appendItemDetail(parentNode){
+        if(parentNode == null) return;
+        for(let i=0; i<itemLists.length; i++){
+            let item = document.createElement("div");
+            item.classList.add("item", "bg-grey");
+            item.innerHTML = `
+            <div style="display: table-cell;">
+                <img src=${itemLists[i].imgUrl} class="item-img">
+            </div>
+            <div style="display: table-cell;">
+                <h3>${itemLists[i].getName()}</h3>
+                <p>$${itemLists[i].price}&nbsp;&nbsp;+${itemLists[i].getAmountPer()}&nbsp;per&nbsp;second</p>
+            </div>
+            <div class="text-center" style="display: table-cell; vertical-align: middle;">
+                <h3>${currentUser.items.eachItemCount.get(itemLists[i].getName()) == undefined ? 0 : currentUser.items.eachItemCount.get(itemLists[i].getName())}</h3>
+            </div>
+            `
+            parentNode.append(item);
+        }
+    }
 }
 
 class ClickerEmpireGame{
@@ -466,22 +484,21 @@ class ClickerEmpireGame{
     }
 }
 
-// function initializeItemLists(){
-//     itemLists = [
-//         new FlipMachine(0, 500, 15000, 25),
-//         new Investment(1, Infinity, 300000, 0.001),
-//         new Investment(2, Infinity, 300000, 0.0007),
-//         new RealEstate(3, 1000, 30000, 30),
-//         new RealEstate(4, 500, 100000, 120),
-//         new RealEstate(5, 100, 20000000, 32000),
-//         new RealEstate(6, 100, 40000000, 64000),
-//         new RealEstate(7, 100, 250000000, 500000),
-//         new RealEstate(8, 10, 1000000000, 2200000),
-//         new RealEstate(9, 5, 10000000000, 25000000),
-//         new RealEstate(10, 1, 10000000000, 39999999999)
-//     ];
-//     return itemLists;
-// }
+function initializeItemLists(){
+    itemLists = [
+        new FlipMachine(config.flipMachineImgUrl, 500, 15000, 25),
+        new EtcStock(config.etcStockImgUrl, Infinity, 300000, 0.001),
+        new EtcBonds(config.etcBondsImgUrl, Infinity, 300000, 0.0007),
+        new LemonadeStand(config.lemonadeImgUrl, 1000, 30000, 30),
+        new IceCreamTruck(config.iceCreamImgUrl, 500, 100000, 120),
+        new House(config.houseImgUrl, 100, 20000000, 32000),
+        new TownHouse(config.townHouseImgUrl, 100, 40000000, 64000),
+        new Mansion(config.mansionImgUrl, 100, 250000000, 500000),
+        new IndustrialSpace(config.industrialSpaceImgUrl, 10, 1000000000, 2200000),
+        new HotelSkyscraper(config.hotelSkyscraperImgUrl, 5, 10000000000, 25000000),
+        new BulletSpeedSkyRailsway(config.bulletSpeedSkyRailswayImgUrl, 1, 10000000000, 39999999999)
+    ];
+    return itemLists;
+}
 
 ClickerEmpireGame.main();
-alert("画像の調達、表示させるインスタンスの作成、viewに表示")
