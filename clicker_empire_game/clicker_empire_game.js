@@ -248,7 +248,7 @@ class Controller{
         let userAge  = Number(document.getElementById("input-user-age").value);
 
         currentUser = new User(userName, userAge, new FlipMachine(config.hambugerImgUrl,500,15000,25));
-        displayedItems = initializeItemLists();
+        displayedItems = initializeItemMap();
 
         this.main();
     }
@@ -297,6 +297,7 @@ class ViewRender{
         this.target.innerHTML = null;
         this.target.append(this.#createMainPage());
         let itemBox = document.getElementById("item-box");
+        // this.#appendItemDetail(itemBox);
         this.#appendItemDetail(itemBox);
     }
     static renderItemsPage(){
@@ -366,7 +367,7 @@ class ViewRender{
                 <div class="col-sm-5 col-md-5 col-lg-5 bg-dark vh-95 margin-top-15">
                     <div class="margin-top-10 vh-10">
                         <div class="bg-grey" style="height: 100%; vertical-align: middle;">
-                            <h3 class="text-center" style="vertical-align: middle;">1,102&nbsp;burgers</h3>
+                            <h3 class="text-center" style="vertical-align: middle;">${currentUser.items.eachItemCount.get()}&nbsp;burgers</h3>
                             <p class="text-center" style="vertical-align: middle;">2.5$ per second</p>
                         </div>
                     </div>
@@ -458,23 +459,24 @@ class ViewRender{
     }
     static #appendItemDetail(parentNode){
         if(parentNode == null) return;
-        for(let i=0; i<itemLists.length; i++){
-            let item = document.createElement("div");
-            item.classList.add("item", "bg-grey");
-            item.innerHTML = `
+        displayedItems.forEach((value, key) => {
+            let itemDiv = document.createElement("div");
+            let item = value;
+            itemDiv.classList.add("item", "bg-grey");
+            itemDiv.innerHTML = `
             <div style="display: table-cell;">
-                <img src=${itemLists[i].imgUrl} class="item-img">
+                <img src=${item.imgUrl} class="item-img">
             </div>
             <div style="display: table-cell;">
-                <h3>${itemLists[i].getName()}</h3>
-                <p>$${itemLists[i].price}&nbsp;&nbsp;+${itemLists[i].getAmountPer()}&nbsp;per&nbsp;second</p>
+                <h3>${item.getName()}</h3>
+                <p>$${item.price}&nbsp;&nbsp;+${item.getAmountPer()}&nbsp;per&nbsp;second</p>
             </div>
             <div class="text-center" style="display: table-cell; vertical-align: middle;">
-                <h3>${currentUser.items.eachItemCount.get(itemLists[i].getName()) == undefined ? 0 : currentUser.items.eachItemCount.get(itemLists[i].getName())}</h3>
+                <h3>${currentUser.items.eachItemCount.get(item.getName()) == undefined ? 0 : currentUser.items.eachItemCount.get(item.getName())}</h3>
             </div>
             `
-            parentNode.append(item);
-        }
+            parentNode.append(itemDiv);
+        });
     }
 }
 
@@ -484,21 +486,21 @@ class ClickerEmpireGame{
     }
 }
 
-function initializeItemLists(){
-    itemLists = [
-        new FlipMachine(config.flipMachineImgUrl, 500, 15000, 25),
-        new EtcStock(config.etcStockImgUrl, Infinity, 300000, 0.001),
-        new EtcBonds(config.etcBondsImgUrl, Infinity, 300000, 0.0007),
-        new LemonadeStand(config.lemonadeImgUrl, 1000, 30000, 30),
-        new IceCreamTruck(config.iceCreamImgUrl, 500, 100000, 120),
-        new House(config.houseImgUrl, 100, 20000000, 32000),
-        new TownHouse(config.townHouseImgUrl, 100, 40000000, 64000),
-        new Mansion(config.mansionImgUrl, 100, 250000000, 500000),
-        new IndustrialSpace(config.industrialSpaceImgUrl, 10, 1000000000, 2200000),
-        new HotelSkyscraper(config.hotelSkyscraperImgUrl, 5, 10000000000, 25000000),
-        new BulletSpeedSkyRailsway(config.bulletSpeedSkyRailswayImgUrl, 1, 10000000000, 39999999999)
-    ];
-    return itemLists;
+function initializeItemMap(){
+    itemMap = new Map([
+        ["flipMachine", new FlipMachine(config.flipMachineImgUrl, 500, 15000, 25)],
+        ["etcStock", new EtcStock(config.etcStockImgUrl, Infinity, 300000, 0.001)],
+        ["etcBonds", new EtcBonds(config.etcBondsImgUrl, Infinity, 300000, 0.0007)],
+        ["lemonadeStand", new LemonadeStand(config.lemonadeImgUrl, 1000, 30000, 30)],
+        ["iceCreamTruck", new IceCreamTruck(config.iceCreamImgUrl, 500, 100000, 120)],
+        ["house", new House(config.houseImgUrl, 100, 20000000, 32000)],
+        ["townHouse", new TownHouse(config.townHouseImgUrl, 100, 40000000, 64000)],
+        ["mansion", new Mansion(config.mansionImgUrl, 100, 250000000, 500000)],
+        ["industrialSpace", new IndustrialSpace(config.industrialSpaceImgUrl, 10, 1000000000, 2200000)],
+        ["hotelSkyscraper", new HotelSkyscraper(config.hotelSkyscraperImgUrl, 5, 10000000000, 25000000)],
+        ["bulletSpeedSkyRailsway", new BulletSpeedSkyRailsway(config.bulletSpeedSkyRailswayImgUrl, 1, 10000000000, 39999999999)]
+    ]);
+    return itemMap;
 }
 
 ClickerEmpireGame.main();
