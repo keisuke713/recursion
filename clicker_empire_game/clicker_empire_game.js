@@ -24,9 +24,13 @@ class User{
         this.items = new Items(flipMachine);
     }
     // ハンバーガーを一回クリックするごとに得られる金額
-    getAmountPerClick(){}
+    getAmountPerClick(){
+        return this.items.getAmountPerClick();
+    }
     // 一秒経つごとに得られる金額
-    getAmountPerSecond(){}
+    getAmountPerSecond(){
+        return this.items.getAmountPerSecond();
+    }
 
     // バリデーション
     #initializedName(name){
@@ -218,15 +222,27 @@ class Items{
         this.addItemToCache(item);
     }
     addItemToList(item){
-        // if(this.#isItem(item)) this.list.push(item);
         this.#isItem(item);
         this.list.push(item);
     }
     addItemToCache(item){
-        // if(!this.#isItem(item)) return;
         this.#isItem(item);
         if(this.eachItemCount.get(item.getName())==undefined) this.eachItemCount.set(item.getName(),1);
         else this.eachItemCount.set(item.getName(), this.eachItemCount.get(item.getName())+1);
+    }
+    getAmountPerClick(){
+        let summary = 0;
+        for(let i=0; i<this.list.length; i++){
+            if(this.list[i].getName() == "flipMachine") summary += this.list[i].getAmountPer();
+        }
+        return summary;
+    }
+    getAmountPerSecond(){
+        let summary = 0;
+        for(let i=0; i<this.list.length; i++){
+            if(this.list[i].getName() != "flipMachine") summary += this.list[i].getAmountPer();
+        }
+        return summary;      
     }
     #isItem(item){
         if(item instanceof Item == false) throw `${item} is not Item`;
@@ -368,11 +384,11 @@ class ViewRender{
                 <div class="col-sm-5 col-md-5 col-lg-5 bg-dark vh-95 margin-top-15">
                     <div class="margin-top-10 vh-10">
                         <div class="bg-grey" style="height: 100%; vertical-align: middle;">
-                            <h3 class="text-center" style="vertical-align: middle;">${currentUser.hambuerCount}&nbsp;burgers</h3>
-                            <p class="text-center" style="vertical-align: middle;">${displayedItems.get("flipMachine").getAmountPer()}$ per second</p>
+                            <h3 class="text-center" style="vertical-align: middle;"><span id="hambugerCount">${currentUser.hambuerCount}</span>&nbsp;burgers</h3>
+                            <p class="text-center" style="vertical-align: middle;"><span id="amountPerClick">${displayedItems.get("flipMachine").getAmountPer()}</span>$&nbsp;per&nbsp;second</p>
                         </div>
                     </div>
-                    <div class="text-center" style="padding-top: 50px;">
+                    <div class="text-center" style="padding-top: 50px;"onclick='clickHamburger();'>
                         <img src="https://cdn.pixabay.com/photo/2014/04/02/17/00/burger-307648_960_720.png" style="max-width: 60%;">
                     </div>
                 </div>
@@ -381,12 +397,12 @@ class ViewRender{
                     <!-- user-info -->
                     <div class="bg-dark" style="padding-top:10px; margin-bottom: 10px; height: 12vh;">
                         <div class="user-info-row">
-                            <div class="bg-grey text-center user-info-cell">${test}</div>
-                            <div class="bg-grey text-center user-info-cell">25 yrs old</div>
+                            <div class="bg-grey text-center user-info-cell">${currentUser.name}</div>
+                            <div class="bg-grey text-center user-info-cell"><span>${currentUser.age}</span>&nbsp;years&nbsp;old</div>
                         </div>
                         <div class="user-info-row">
-                            <div class="bg-grey text-center user-info-cell">1,882 days</div>
-                            <div class="bg-grey text-center user-info-cell">$1000</div>
+                            <div class="bg-grey text-center user-info-cell">1,882&nbsp;days</div>
+                            <div class="bg-grey text-center user-info-cell">$<span id="asset">${currentUser.assets.toLocaleString()}</span></div>
                         </div>
                     </div>
                     <!-- itemlist -->
@@ -470,7 +486,7 @@ class ViewRender{
             </div>
             <div style="display: table-cell;">
                 <h3>${item.getName()}</h3>
-                <p>$${item.price}&nbsp;&nbsp;+${item.getAmountPer()}&nbsp;per&nbsp;second</p>
+                <p>$${item.price.toLocaleString()}&nbsp;&nbsp;+${item.getAmountPer().toLocaleString()}&nbsp;per&nbsp;second</p>
             </div>
             <div class="text-center" style="display: table-cell; vertical-align: middle;">
                 <h3>${currentUser.items.eachItemCount.get(item.getName()) == undefined ? 0 : currentUser.items.eachItemCount.get(item.getName())}</h3>
@@ -502,6 +518,17 @@ function initializeItemMap(){
         ["bulletSpeedSkyRailsway", new BulletSpeedSkyRailsway(config.bulletSpeedSkyRailswayImgUrl, 1, 10000000000, 39999999999)]
     ]);
     return itemMap;
+}
+
+function clickHamburger(){
+    currentUser.hambuerCount += 1;
+    currentUser.assets += currentUser.getAmountPerClick();
+
+    let hambuerCount = document.getElementById("hambugerCount");
+    if(hambuerCount != null) hambuerCount.innerHTML = currentUser.hambuerCount.toLocaleString();
+
+    let asset = document.getElementById("asset");
+    if(asset != null) asset.innerHTML = currentUser.assets.toLocaleString();
 }
 
 ClickerEmpireGame.main();
