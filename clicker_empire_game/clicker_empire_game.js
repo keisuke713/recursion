@@ -20,6 +20,7 @@ class User{
         this.age = this.#initializedAge(age);
         this.assets = 50000;
         this.timeKeeper = new TimeKeeper(flipMachine);
+        this.hambuerCount = 0;
         this.items = new Items(flipMachine);
     }
     // ハンバーガーを一回クリックするごとに得られる金額
@@ -367,8 +368,8 @@ class ViewRender{
                 <div class="col-sm-5 col-md-5 col-lg-5 bg-dark vh-95 margin-top-15">
                     <div class="margin-top-10 vh-10">
                         <div class="bg-grey" style="height: 100%; vertical-align: middle;">
-                            <h3 class="text-center" style="vertical-align: middle;">${currentUser.items.eachItemCount.get()}&nbsp;burgers</h3>
-                            <p class="text-center" style="vertical-align: middle;">2.5$ per second</p>
+                            <h3 class="text-center" style="vertical-align: middle;">${currentUser.hambuerCount}&nbsp;burgers</h3>
+                            <p class="text-center" style="vertical-align: middle;">${displayedItems.get("flipMachine").getAmountPer()}$ per second</p>
                         </div>
                     </div>
                     <div class="text-center" style="padding-top: 50px;">
