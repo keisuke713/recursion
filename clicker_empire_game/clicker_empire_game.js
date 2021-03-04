@@ -19,7 +19,7 @@ class User{
         this.name = this.#initializedName(name);
         this.age = this.#initializedAge(age);
         this.assets = 50000;
-        this.timeKeeper = new TimeKeeper(flipMachine);
+        this.timeKeeper = new TimeKeeper();
         this.hambuerCount = 0;
         this.items = new Items(flipMachine);
     }
@@ -31,7 +31,15 @@ class User{
     getAmountPerSecond(){
         return this.items.getAmountPerSecond();
     }
-
+    getAmountOfDays(){
+        return this.timeKeeper.getAmountOfDays();
+    }
+    incremnetAmountOfDays(){
+        this.timeKeeper.incremnetAmountOfDays();
+    }
+    isBirthDay(){
+        return this.timeKeeper.passedOneYear();
+    }
     // バリデーション
     #initializedName(name){
         // if(name.length <= 0) alert("名前決めないなら勝手に決めちゃうよ？君の名前は名無しのゴンベだ！")
@@ -46,8 +54,16 @@ class TimeKeeper{
     constructor(){
         this.amountOfDays = 0;
     }
+    getAmountOfDays(){
+        return this.amountOfDays;
+    }
+    incremnetAmountOfDays(){
+        this.amountOfDays += 1;
+    }
     // 1年経過したかどうか
-    passedOneYear(){}
+    passedOneYear(){
+        return this.amountOfDays != 0 && this.amountOfDays % 365 == 0;
+    }
 }
 // 本当はインターフェイスを使いたかったけどJavaScriptにはなかったから仕方なく継承
 class Item{
@@ -314,7 +330,6 @@ class ViewRender{
         this.target.innerHTML = null;
         this.target.append(this.#createMainPage());
         let itemBox = document.getElementById("item-box");
-        // this.#appendItemDetail(itemBox);
         this.#appendItemDetail(itemBox);
     }
     static renderItemsPage(){
@@ -398,10 +413,10 @@ class ViewRender{
                     <div class="bg-dark" style="padding-top:10px; margin-bottom: 10px; height: 12vh;">
                         <div class="user-info-row">
                             <div class="bg-grey text-center user-info-cell">${currentUser.name}</div>
-                            <div class="bg-grey text-center user-info-cell"><span>${currentUser.age}</span>&nbsp;years&nbsp;old</div>
+                            <div class="bg-grey text-center user-info-cell"><span id="currentUserAge">${currentUser.age}</span>&nbsp;years&nbsp;old</div>
                         </div>
                         <div class="user-info-row">
-                            <div class="bg-grey text-center user-info-cell">1,882&nbsp;days</div>
+                            <div class="bg-grey text-center user-info-cell"><span id="amountOfDays">${currentUser.getAmountOfDays()}</span>&nbsp;days</div>
                             <div class="bg-grey text-center user-info-cell">$<span id="asset">${currentUser.assets.toLocaleString()}</span></div>
                         </div>
                     </div>
@@ -525,10 +540,31 @@ function clickHamburger(){
     currentUser.assets += currentUser.getAmountPerClick();
 
     let hambuerCount = document.getElementById("hambugerCount");
-    if(hambuerCount != null) hambuerCount.innerHTML = currentUser.hambuerCount.toLocaleString();
+    setData(hambuerCount, currentUser.hambuerCount.toLocaleString());
 
     let asset = document.getElementById("asset");
-    if(asset != null) asset.innerHTML = currentUser.assets.toLocaleString();
+    setData(asset, currentUser.assets.toLocaleString());
 }
+
+function setData(node, data){
+    if(node != null) node.innerHTML = data;
+}
+
+setInterval(function(){
+    if(currentUser == null) return;
+
+    currentUser.incremnetAmountOfDays();
+    if(currentUser.isBirthDay()) currentUser.age += 1;
+
+    let currentUserAge = document.getElementById("currentUserAge");
+    setData(currentUserAge, currentUser.age);
+
+    let amountOfDays = document.getElementById("amountOfDays");
+    setData(amountOfDays, currentUser.getAmountOfDays().toLocaleString());
+
+    currentUser.assets += currentUser.getAmountPerSecond();
+    let asset = document.getElementById("asset");
+    setData(asset, currentUser.assets);
+},1000)
 
 ClickerEmpireGame.main();
