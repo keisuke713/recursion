@@ -298,8 +298,8 @@ class Controller{
     // itemへ選択したpageへ遷移(GET)
     // idを引数として受け取り対象のitemを取得してその情報をレンダリング
     // mainpageの一部のみ書き換える
-    static item(){
-        ViewRender.renderItemPage();
+    static item(item){
+        // ViewRender.renderItemPage();
     }
     // itemを購入せずバックする時に使う(GET?)
     // mainpageの一部を書き換える
@@ -492,22 +492,21 @@ class ViewRender{
     static #appendItemDetail(parentNode){
         if(parentNode == null) return;
         displayedItems.forEach((value, key) => {
-            let itemDiv = document.createElement("div");
             let item = value;
-            itemDiv.classList.add("item", "bg-grey");
-            itemDiv.innerHTML = `
-            <div style="display: table-cell;">
-                <img src=${item.imgUrl} class="item-img">
-            </div>
-            <div style="display: table-cell;">
-                <h3>${item.getName()}</h3>
-                <p>$${item.price.toLocaleString()}&nbsp;&nbsp;+${item.getAmountPer().toLocaleString()}&nbsp;per&nbsp;second</p>
-            </div>
-            <div class="text-center" style="display: table-cell; vertical-align: middle;">
-                <h3>${currentUser.items.eachItemCount.get(item.getName()) == undefined ? 0 : currentUser.items.eachItemCount.get(item.getName())}</h3>
+            parentNode.innerHTML += `
+            <div class="item bg-grey" onclick='Controller.item("${item.getName()}")'>
+                <div style="display: table-cell;">
+                    <img src=${item.imgUrl} class="item-img">
+                </div>
+                <div style="display: table-cell;">
+                    <h3>${item.getName()}</h3>
+                    <p>$${item.price.toLocaleString()}&nbsp;&nbsp;+${item.getAmountPer().toLocaleString()}&nbsp;per&nbsp;second</p>
+                </div>
+                <div class="text-center" style="display: table-cell; vertical-align: middle;">
+                    <h3>${currentUser.items.eachItemCount.get(item.getName()) == undefined ? 0 : currentUser.items.eachItemCount.get(item.getName())}</h3>
+                </div>
             </div>
             `
-            parentNode.append(itemDiv);
         });
     }
 }
