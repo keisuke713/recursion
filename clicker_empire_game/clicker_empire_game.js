@@ -262,7 +262,6 @@ class Items{
     }
     #isItem(item){
         if(item instanceof Item == false) throw `${item} is not Item`;
-        // return item instanceof Item;
     }
 }
 
@@ -326,9 +325,9 @@ class Controller{
         }
         currentUser.assets -= item.price * numberOfPurchased;
         for(let i=0; i<numberOfPurchased; i++){
-            currentUser.items.list.push(item);
+            currentUser.items.addItemToList(item);
+            currentUser.items.addItemToCache(item);
         }
-        currentUser.items.eachItemCount.set(item.getName(), currentUser.items.eachItemCount.get(item.getName())+numberOfPurchased);
 
         ViewRender.renderItemsPage();
     }
