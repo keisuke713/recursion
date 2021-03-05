@@ -298,8 +298,9 @@ class Controller{
     // itemへ選択したpageへ遷移(GET)
     // idを引数として受け取り対象のitemを取得してその情報をレンダリング
     // mainpageの一部のみ書き換える
-    static item(item){
-        // ViewRender.renderItemPage();
+    static item(itemName){
+        let item = displayedItems.get(itemName);
+        ViewRender.renderItemPage(item);
     }
     // itemを購入せずバックする時に使う(GET?)
     // mainpageの一部を書き換える
@@ -308,7 +309,14 @@ class Controller{
     }
     // userのitemリストに購入したitemを加える(POST)
     // mainpageの一部のみ書き換える
-    static purchase(){
+    static purchase(itemName){
+        let item = displayedItems.get(itemName);
+        let numberOfPurchased = Number(document.getElementById("input-number-of-purchased").value);
+        if(numberOfPurchased<1){
+            alert("購入個数は1個以上にしてください");
+            return;
+        }
+
         ViewRender.renderItemsPage();
     }
     static #isUserPresent(){
@@ -337,14 +345,14 @@ class ViewRender{
         if(itemBox==null) return;
 
         itemBox.innerHTML = null;
-        itemBox.append(this.#createPatialItems());
+        this.#appendItemDetail(itemBox);
     }
-    static renderItemPage(){
+    static renderItemPage(item){
         let itemBox = document.getElementById("item-box");
         if(itemBox==null) return;
 
         itemBox.innerHTML = null;
-        itemBox.append(this.#createPatialItem());
+        itemBox.append(this.#createPatialItem(item));
     }
     static #createStartPage(){
         let container = this.#createContainer("start");
@@ -400,7 +408,7 @@ class ViewRender{
                     <div class="margin-top-10 vh-10">
                         <div class="bg-grey" style="height: 100%; vertical-align: middle;">
                             <h3 class="text-center" style="vertical-align: middle;"><span id="hambugerCount">${currentUser.hambuerCount}</span>&nbsp;burgers</h3>
-                            <p class="text-center" style="vertical-align: middle;"><span id="amountPerClick">${displayedItems.get("flipMachine").getAmountPer()}</span>$&nbsp;per&nbsp;second</p>
+                            <p class="text-center" style="vertical-align: middle;"><span id="amountPerClick">$${displayedItems.get("flipMachine").getAmountPer()}</span>&nbsp;per&nbsp;second</p>
                         </div>
                     </div>
                     <div class="text-center" style="padding-top: 50px;"onclick='clickHamburger();'>
@@ -432,28 +440,7 @@ class ViewRender{
         `
         return container;
     }
-    static #createPatialItems(){
-        let container = document.createElement("div");
-        container.classList.add("bg-dark", "vh-70");
-        container.setAttribute("style", "overflow:scroll;");
-        container.innerHTML = 
-        `
-        <div class="item bg-grey">
-            <div style="display: table-cell;">
-                <img src="https://cdn.pixabay.com/photo/2014/04/02/17/00/burger-307648_960_720.png" class="item-img">
-            </div>
-            <div style="display: table-cell;">
-                <h3>ItemName</h3>
-                <p><span>$30,000</span><span>&nbsp;&nbsp;</span><span>+32,000</span></p>
-            </div>
-            <div class="text-center" style="display: table-cell; vertical-align: middle;">
-                <h3>2</h3>
-            </div>
-        </div>
-        `
-        return container;
-    }
-    static #createPatialItem(){
+    static #createPatialItem(item){
         let container = document.createElement("div");
         container.classList.add("bg-dark", "vh-70");
         container.setAttribute("style", "overflow:scroll;");
@@ -462,22 +449,22 @@ class ViewRender{
         <div class="bg-grey purchase-screen">
             <div style="width:90%; margin: 10px auto; display: table; table-layout: fixed;">
                 <div style="display: table-cell; vertical-align: top;">
-                    <h3>House</h3>
-                    <p>Max Purchased: 100</p>
-                    <p>Price: $20,000,000</p>
-                    <p>Get 32,000 extra yen per second</p>
+                    <h3>${item.getName()}</h3>
+                    <p>Max&nbsp;Purchased:&nbsp;${item.maxPurchased}</p>
+                    <p>Price:&nbsp;$${item.price.toLocaleString()}</p>
+                    <p>Get&nbsp;$${item.getAmountPer().toLocaleString()}&nbsp;extranbsp;$&nbsp;per&nbsp;second</p>
                 </div>
                 <div style="display: table-cell;">
-                    <img src="https://cdn.pixabay.com/photo/2014/04/02/17/00/burger-307648_960_720.png" class="item-img">
+                    <img src="${item.imgUrl}" class="item-img">
                 </div>
             </div>
             <div class="ele-center">
                 <p>Hou many would you like to Purchase?</p>
-                <input type="number" name="quantity" class="form-control" placeholder="" value="" required>
+                <input type="number" name="numberOfPurchased" class="form-control" id="input-number-of-purchased" placeholder="" value="" required>
             </div>
             <div class="text-right ele-center">
-                <button type="button" class="btn btn-lg btn-primary">Go back</button>
-                <button type="button" class="btn btn-lg btn-primary">Purchase</button>
+                <button type="button" class="btn btn-lg btn-primary" onclick='Controller.backMain()'>Go back</button>
+                <button type="button" class="btn btn-lg btn-primary" onclick='Controller.purchase("${item.getName()}");return false;'>Purchase</button>
             </div>
         </div>
         `
@@ -563,7 +550,7 @@ setInterval(function(){
 
     currentUser.assets += currentUser.getAmountPerSecond();
     let asset = document.getElementById("asset");
-    setData(asset, currentUser.assets);
+    setData(asset, currentUser.assets.toLocaleString());
 },1000)
 
 ClickerEmpireGame.main();
