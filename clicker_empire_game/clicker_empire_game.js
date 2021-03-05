@@ -316,6 +316,19 @@ class Controller{
             alert("購入個数は1個以上にしてください");
             return;
         }
+        if(numberOfPurchased != Infinity && item.maxPurchased<numberOfPurchased){
+            alert("最大購入数をオーバーしています");
+            return;
+        }
+        if(currentUser.assets < item.price * numberOfPurchased){
+            alert("お金足りないよー");
+            return;
+        }
+        currentUser.assets -= item.price * numberOfPurchased;
+        for(let i=0; i<numberOfPurchased; i++){
+            currentUser.items.list.push(item);
+        }
+        currentUser.items.eachItemCount.set(item.getName(), currentUser.items.eachItemCount.get(item.getName())+numberOfPurchased);
 
         ViewRender.renderItemsPage();
     }
