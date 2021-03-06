@@ -40,6 +40,12 @@ class User{
     isBirthDay(){
         return this.timeKeeper.passedOneYear();
     }
+    canPurchased(itemPrice, numberOfPurchased){
+        return this.assets > this.totalItemPrice(itemPrice, numberOfPurchased);
+    }
+    totalItemPrice(itemPrice, numberOfPurchased){
+        return itemPrice * numberOfPurchased;
+    }
     // バリデーション
     #initializedName(name){
         // if(name.length <= 0) alert("名前決めないなら勝手に決めちゃうよ？君の名前は名無しのゴンベだ！")
@@ -319,7 +325,7 @@ class Controller{
             alert("最大購入数をオーバーしています");
             return;
         }
-        if(currentUser.assets < item.price * numberOfPurchased){
+        if(!currentUser.canPurchased(item.price, numberOfPurchased)){
             alert("お金足りないよー");
             return;
         }
@@ -566,3 +572,4 @@ setInterval(function(){
 },1000)
 
 ClickerEmpireGame.main();
+alert("リファクタリング")
