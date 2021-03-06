@@ -13,6 +13,7 @@ const config = {
 }
 let currentUser = null;
 let displayedItems = null;
+let purchaseManager = null;
 
 class User{
     constructor(name, age, flipMachine){
@@ -270,7 +271,18 @@ class Items{
         if(item instanceof Item == false) throw `${item} is not Item`;
     }
 }
-
+class PurchaseManager{
+    constructor(user){
+        this.user = user;
+    }
+    addItemToUser(item, numberOfPurchased){
+        this.user.assets -= item.price * numberOfPurchased;
+        for(let i=0; i<numberOfPurchased; i++){
+            this.user.items.addItemToList(item);
+            this.user.items.addItemToCache(item);
+        }
+    }
+}
 class Controller{
     // トップページ(GET)
     static start(){
@@ -286,6 +298,7 @@ class Controller{
         let userAge  = Number(document.getElementById("input-user-age").value);
 
         currentUser = new User(userName, userAge, new FlipMachine(config.hambugerImgUrl,500,15000,25));
+        purchaseManager = new PurchaseManager(currentUser);
         displayedItems = initializeItemMap();
 
         this.main();
@@ -329,11 +342,7 @@ class Controller{
             alert("お金足りないよー");
             return;
         }
-        currentUser.assets -= item.price * numberOfPurchased;
-        for(let i=0; i<numberOfPurchased; i++){
-            currentUser.items.addItemToList(item);
-            currentUser.items.addItemToCache(item);
-        }
+        purchaseManager.addItemToUser(item, numberOfPurchased);
 
         ViewRender.renderItemsPage();
     }
@@ -572,4 +581,3 @@ setInterval(function(){
 },1000)
 
 ClickerEmpireGame.main();
-alert("リファクタリング")
