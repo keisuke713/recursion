@@ -47,6 +47,13 @@ class User{
     totalItemPrice(itemPrice, numberOfPurchased){
         return itemPrice * numberOfPurchased;
     }
+    getNewItem(item){
+        this.items.addItemToList(item);
+        this.items.addItemToCache(item);
+    }
+    spendMoney(amountOfMoney){
+        this.assets -= amountOfMoney;
+    }
     // バリデーション
     #initializedName(name){
         // if(name.length <= 0) alert("名前決めないなら勝手に決めちゃうよ？君の名前は名無しのゴンベだ！")
@@ -276,10 +283,9 @@ class PurchaseManager{
         this.user = user;
     }
     addItemToUser(item, numberOfPurchased){
-        this.user.assets -= item.price * numberOfPurchased;
+        this.user.spendMoney(item.price * numberOfPurchased);
         for(let i=0; i<numberOfPurchased; i++){
-            this.user.items.addItemToList(item);
-            this.user.items.addItemToCache(item);
+            this.user.getNewItem(item);
         }
     }
 }
@@ -525,12 +531,6 @@ class ViewRender{
     }
 }
 
-class ClickerEmpireGame{
-    static main(){
-        Controller.start();
-    }
-}
-
 function initializeItemMap(){
     itemMap = new Map([
         ["flipMachine", new FlipMachine(config.flipMachineImgUrl, 500, 15000, 25)],
@@ -580,4 +580,11 @@ setInterval(function(){
     setData(asset, currentUser.assets.toLocaleString());
 },1000)
 
+class ClickerEmpireGame{
+    static main(){
+        Controller.start();
+    }
+}
+
 ClickerEmpireGame.main();
+alert("save機能")
