@@ -11,6 +11,7 @@ const config = {
     hotelSkyscraperImgUrl: "https://cdn.pixabay.com/photo/2012/05/07/18/03/skyscrapers-48853_960_720.png",
     bulletSpeedSkyRailswayImgUrl: "https://cdn.pixabay.com/photo/2013/07/13/10/21/train-157027_960_720.png"
 }
+
 let currentUser = null;
 let displayedItems = null;
 let purchaseManager = null;
@@ -115,7 +116,7 @@ class EtcStock extends Item{
         this.percentage = percentage;
     }
     getAmountPer(){
-        return this.#getPrice() * this.#getPercentage();
+        return Math.round(this.#getPrice() * this.#getPercentage());
     }
     #getPrice(){
         return this.price;
@@ -278,6 +279,17 @@ class Items{
         if(item instanceof Item == false) throw `${item} is not Item`;
     }
 }
+class DisplayedItems{
+    constructor(map){
+        this.itemsMap = map;
+    }
+    get(itemName){
+        return this.itemsMap.get(itemName);
+    }
+    set(itemName, item){
+        this.itemsMap.set(itemName, item);
+    }
+}
 class PurchaseManager{
     constructor(user){
         this.user = user;
@@ -349,6 +361,10 @@ class Controller{
             return;
         }
         purchaseManager.addItemToUser(item, numberOfPurchased);
+        if(item.getName() == "etcStock"){
+            let newEtcBonds = new EtcStock(config.etcStockImgUrl, Infinity, displayedItems.get("etcStock").price * 1.1, 0.001)
+            displayedItems.set("etcStock", newEtcBonds);
+        }
 
         ViewRender.renderItemsPage();
     }
@@ -511,7 +527,7 @@ class ViewRender{
     }
     static #appendItemDetail(parentNode){
         if(parentNode == null) return;
-        displayedItems.forEach((value, key) => {
+        displayedItems.itemsMap.forEach((value, key) => {
             let item = value;
             parentNode.innerHTML += `
             <div class="item bg-grey" onclick='Controller.item("${item.getName()}")'>
@@ -545,7 +561,7 @@ function initializeItemMap(){
         ["hotelSkyscraper", new HotelSkyscraper(config.hotelSkyscraperImgUrl, 5, 10000000000, 25000000)],
         ["bulletSpeedSkyRailsway", new BulletSpeedSkyRailsway(config.bulletSpeedSkyRailswayImgUrl, 1, 10000000000, 39999999999)]
     ]);
-    return itemMap;
+    return new DisplayedItems(itemMap);
 }
 
 function clickHamburger(){
@@ -587,4 +603,3 @@ class ClickerEmpireGame{
 }
 
 ClickerEmpireGame.main();
-alert("save機能")
