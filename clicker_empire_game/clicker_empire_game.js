@@ -17,10 +17,11 @@ let displayedItems = null;
 let purchaseManager = null;
 
 class User{
+    static defaultAssets = 50000;
     constructor(name, age, flipMachine){
         this.name = this.#initializedName(name);
         this.age = this.#initializedAge(age);
-        this.assets = 50000;
+        this.assets = User.defaultAssets;
         this.timeKeeper = new TimeKeeper();
         this.hambuerCount = 0;
         this.items = new Items(flipMachine);
@@ -55,6 +56,12 @@ class User{
     spendMoney(amountOfMoney){
         this.assets -= amountOfMoney;
     }
+    initialized(){
+        this.assets = User.defaultAssets;
+        this.timeKeeper.initialized();
+        this.hambuerCount = 0;
+        this.items.initialized();
+    }
     // バリデーション
     #initializedName(name){
         // if(name.length <= 0) alert("名前決めないなら勝手に決めちゃうよ？君の名前は名無しのゴンベだ！")
@@ -78,6 +85,9 @@ class TimeKeeper{
     // 1年経過したかどうか
     passedOneYear(){
         return this.amountOfDays != 0 && this.amountOfDays % 365 == 0;
+    }
+    initialized(){
+        this.amountOfDays = 0;
     }
 }
 // 本当はインターフェイスを使いたかったけどJavaScriptにはなかったから仕方なく継承
@@ -261,6 +271,12 @@ class Items{
         if(this.eachItemCount.get(item.getName())==undefined) this.eachItemCount.set(item.getName(),1);
         else this.eachItemCount.set(item.getName(), this.eachItemCount.get(item.getName())+1);
     }
+    getItem(itemName){
+        for(let item of this.list){
+            if(item.getName() == itemName) return item;
+        }
+        return null;
+    }
     getAmountPerClick(){
         let summary = 0;
         for(let i=0; i<this.list.length; i++){
@@ -274,6 +290,13 @@ class Items{
             if(this.list[i].getName() != "flipMachine") summary += this.list[i].getAmountPer();
         }
         return summary;      
+    }
+    initialized(){
+        let flipMachine = this.getItem("flipMachine");
+        this.list.splice(0);
+        this.eachItemCount.clear();
+        this.addItemToList(flipMachine);
+        this.addItemToCache(flipMachine);
     }
     #isItem(item){
         if(item instanceof Item == false) throw `${item} is not Item`;
@@ -368,6 +391,12 @@ class Controller{
 
         ViewRender.renderItemsPage();
     }
+    static reset(){
+        currentUser.initialized();
+        displayedItems = initializeItemMap();
+        ViewRender.renderMainPage()
+    }
+    static save(){}
     static #isUserPresent(){
         return currentUser != null;
     }
@@ -481,7 +510,7 @@ class ViewRender{
                     <div class="bg-dark vh-70" style="overflow: scroll;" id="item-box">
                     </div>
                     <div class="vh-10 text-right" style="margin-top: 10px;">
-                        <button type="button" class="btn btn-lg btn-primary fa fa-repeat"></button>
+                        <button type="button" class="btn btn-lg btn-primary fa fa-repeat" onclick='Controller.reset();'></button>
                         <button type="button" class="btn btn-lg btn-primary fa fa-save"></button>
                     </div>
                 </div>
