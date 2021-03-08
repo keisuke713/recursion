@@ -12,9 +12,10 @@ const config = {
     bulletSpeedSkyRailswayImgUrl: "https://cdn.pixabay.com/photo/2013/07/13/10/21/train-157027_960_720.png"
 }
 
-let currentUser = null;
-let displayedItems = null;
-let purchaseManager = null;
+let currentUser;
+let displayedItems;
+let purchaseManager;
+let saveData;
 
 class User{
     static defaultAssets = 50000;
@@ -324,6 +325,15 @@ class PurchaseManager{
         }
     }
 }
+class SaveData{
+    constructor(){
+        this.localStorage = localStorage;
+    }
+    save(value){
+        let id = this.localStorage.length + 1;
+        this.localStorage.setItem(id, JSON.stringify(value));
+    }
+}
 class Controller{
     // トップページ(GET)
     static start(){
@@ -341,6 +351,7 @@ class Controller{
         currentUser = new User(userName, userAge, new FlipMachine(config.hambugerImgUrl,500,15000,25));
         purchaseManager = new PurchaseManager(currentUser);
         displayedItems = initializeItemMap();
+        saveData = new SaveData();
 
         this.main();
     }
@@ -396,7 +407,10 @@ class Controller{
         displayedItems = initializeItemMap();
         ViewRender.renderMainPage()
     }
-    static save(){}
+    static save(){
+        saveData.save(currentUser);
+        alert("現在のデータの保存に成功しました。")
+    }
     static #isUserPresent(){
         return currentUser != null;
     }
@@ -511,7 +525,7 @@ class ViewRender{
                     </div>
                     <div class="vh-10 text-right" style="margin-top: 10px;">
                         <button type="button" class="btn btn-lg btn-primary fa fa-repeat" onclick='Controller.reset();'></button>
-                        <button type="button" class="btn btn-lg btn-primary fa fa-save"></button>
+                        <button type="button" class="btn btn-lg btn-primary fa fa-save" onclick='Controller.save();'></button>
                     </div>
                 </div>
             </div>
