@@ -411,6 +411,9 @@ class Controller{
         saveData.save(currentUser);
         alert("現在のデータの保存に成功しました。")
     }
+    static saveDataIndex(){
+        ViewRender.renderSaveData();
+    }
     static #isUserPresent(){
         return currentUser != null;
     }
@@ -446,6 +449,10 @@ class ViewRender{
         itemBox.innerHTML = null;
         itemBox.append(this.#createPatialItem(item));
     }
+    static renderSaveData(){
+        this.target.innerHTML = null;
+        this.target.append(this.#createSaveDataPage());
+    }
     static #createStartPage(){
         let container = this.#createContainer("start");
         container.innerHTML = 
@@ -458,7 +465,7 @@ class ViewRender{
                 <button type="button" class="btn btn-lg btn-primary" onclick='Controller.signup()'>最初から</button>
             </div>
             <div class="col-sm-6 col-md-12 col-lg-12 text-center">
-                <button type="button" class="btn btn-lg btn-primary" onclick='alert("coming soon")'>続きから</button>
+                <button type="button" class="btn btn-lg btn-primary" onclick='Controller.saveDataIndex()'>続きから</button>
             </div>
         </div>
         `
@@ -482,6 +489,7 @@ class ViewRender{
                             <input type="number" name="userAge" class="form-control" id="input-user-age" placeholder="年齢" value="">
                         </div>
                         <button type="submit" class="btn btn-primary col-12" onclick='Controller.register();return false;'>新規登録</button>
+                        <button type="button" class="btn btn-primary col-12" onclick='Controller.start();return false;'>戻る</button>
                     </form>
                 </div>
             </div>
@@ -587,6 +595,35 @@ class ViewRender{
             </div>
             `
         });
+    }
+    static #createSaveDataPage(){
+        let container = this.#createContainer("saveDatas");
+        container.innerHTML =
+        `
+        <div class="row align-middle" style="border: 1px solid white; margin: 10px;">
+            <div class="col-sm-12 col-md-6 col-lg-6">
+                test
+            </div>
+            <div class="col-sm-12 col-md-6 col-lg-6">
+                test
+            </div>
+        </div>
+        <div class="row align-middle">
+            <div class="col-sm-12 col-md-6 col-lg-6">
+                test
+            </div>
+            <div class="col-sm-12 col-md-6 col-lg-6">
+                test
+            </div>
+        </div>
+        <div class="row align-middle">
+            <div class="col-sm-12 col-md-12 col-lg-12 save-data-box">
+                <button type="button" class="btn btn-primary col-12" onclick='Controller.start();return false;'>戻る</button>
+            </div>
+        </div>
+        `
+        console.log(container);
+        return container;
     }
 }
 
