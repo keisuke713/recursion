@@ -326,18 +326,19 @@ class PurchaseManager{
     }
 }
 class SaveData{
+    static key = "clickerEmpireGameSaveData";
     constructor(){
         this.localStorage = localStorage;
     }
     save(value){
-        // let id = this.localStorage.length + 1;
-        this.localStorage.setItem(this.id(), JSON.stringify(value));
+        this.localStorage.setItem(SaveData.key, JSON.stringify(value));
+        alert("現在のデータの保存に成功しました。");
     }
-    get(key){
-        return this.localStorage[key];
+    get(){
+        return this.localStorage[SaveData.key];
     }
-    id(){
-        return this.localStorage.length + 1;
+    hasData(){
+        return this.localStorage[SaveData.key] != undefined;
     }
 }
 class Controller{
@@ -357,7 +358,6 @@ class Controller{
         currentUser = new User(userName, userAge, new FlipMachine(config.hambugerImgUrl,500,15000,25));
         purchaseManager = new PurchaseManager(currentUser);
         displayedItems = initializeItemMap();
-        saveData = new SaveData();
 
         this.main();
     }
@@ -415,10 +415,14 @@ class Controller{
     }
     static save(){
         saveData.save(currentUser);
-        alert("現在のデータの保存に成功しました。")
     }
-    static saveDataIndex(){
-        ViewRender.renderSaveData();
+    static restore(){
+        if(!saveData.hasData()){
+            alert("保存されたデータはありません");
+            return;
+        }
+        let object = JSON.parse(saveData.get());
+        console.log(object);
     }
     static #isUserPresent(){
         return currentUser != null;
@@ -455,10 +459,6 @@ class ViewRender{
         itemBox.innerHTML = null;
         itemBox.append(this.#createPatialItem(item));
     }
-    static renderSaveData(){
-        this.target.innerHTML = null;
-        this.target.append(this.#createSaveDataPage());
-    }
     static #createStartPage(){
         let container = this.#createContainer("start");
         container.innerHTML = 
@@ -471,7 +471,7 @@ class ViewRender{
                 <button type="button" class="btn btn-lg btn-primary" onclick='Controller.signup()'>最初から</button>
             </div>
             <div class="col-sm-6 col-md-12 col-lg-12 text-center">
-                <button type="button" class="btn btn-lg btn-primary" onclick='Controller.saveDataIndex()'>続きから</button>
+                <button type="button" class="btn btn-lg btn-primary" onclick='Controller.restore()'>続きから</button>
             </div>
         </div>
         `
@@ -602,41 +602,6 @@ class ViewRender{
             `
         });
     }
-    static #createSaveDataPage(){
-        let container = this.#createContainer("saveDatas");
-        saveData = new SaveData();
-        let a = JSON.parse(saveData.get(1));
-        container.setAttribute("style", "padding: 10px; color: white;");
-        container.innerHTML =
-        `
-        <div class="row align-middle" style="border: 1px solid white; margin:10px;">
-            <div class="col-sm-12 col-md-6 col-lg-6">
-                test
-            </div>
-            <div class="col-sm-12 col-md-6 col-lg-6">
-                test
-            </div>
-        </div>
-        <div class="row align-middle" style="border: 1px solid white; margin:10px;">
-            <div class="col-sm-12 col-md-1 col-lg-1">
-                <h3 class="">id:1</h3>
-            </div>
-            <div class="col-sm-12 col-md-7 col-lg-7">
-                userName:${a.name}
-            </div>
-            <div class="col-sm-12 col-md-2 col-lg-2" style="padding:5px;">
-                <button type="button" class="btn btn-primary" onclick='Controller.start();return false;'>戻る</button>
-            </div>
-        </div>
-        <div class="row align-middle">
-            <div class="col-sm-12 col-md-12 col-lg-12 save-data-box">
-                <button type="button" class="btn btn-primary col-12" onclick='Controller.start();return false;'>戻る</button>
-            </div>
-        </div>
-        `
-        console.log(container);
-        return container;
-    }
 }
 
 function initializeItemMap(){
@@ -690,8 +655,8 @@ setInterval(function(){
 
 class ClickerEmpireGame{
     static main(){
-        // Controller.start();
-        Controller.saveDataIndex();
+        saveData = new SaveData();
+        Controller.start();
     }
 }
 
