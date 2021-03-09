@@ -330,8 +330,14 @@ class SaveData{
         this.localStorage = localStorage;
     }
     save(value){
-        let id = this.localStorage.length + 1;
-        this.localStorage.setItem(id, JSON.stringify(value));
+        // let id = this.localStorage.length + 1;
+        this.localStorage.setItem(this.id(), JSON.stringify(value));
+    }
+    get(key){
+        return this.localStorage[key];
+    }
+    id(){
+        return this.localStorage.length + 1;
     }
 }
 class Controller{
@@ -598,9 +604,12 @@ class ViewRender{
     }
     static #createSaveDataPage(){
         let container = this.#createContainer("saveDatas");
+        saveData = new SaveData();
+        let a = JSON.parse(saveData.get(1));
+        container.setAttribute("style", "padding: 10px; color: white;");
         container.innerHTML =
         `
-        <div class="row align-middle" style="border: 1px solid white; margin: 10px;">
+        <div class="row align-middle" style="border: 1px solid white; margin:10px;">
             <div class="col-sm-12 col-md-6 col-lg-6">
                 test
             </div>
@@ -608,12 +617,15 @@ class ViewRender{
                 test
             </div>
         </div>
-        <div class="row align-middle">
-            <div class="col-sm-12 col-md-6 col-lg-6">
-                test
+        <div class="row align-middle" style="border: 1px solid white; margin:10px;">
+            <div class="col-sm-12 col-md-1 col-lg-1">
+                <h3 class="">id:1</h3>
             </div>
-            <div class="col-sm-12 col-md-6 col-lg-6">
-                test
+            <div class="col-sm-12 col-md-7 col-lg-7">
+                userName:${a.name}
+            </div>
+            <div class="col-sm-12 col-md-2 col-lg-2" style="padding:5px;">
+                <button type="button" class="btn btn-primary" onclick='Controller.start();return false;'>戻る</button>
             </div>
         </div>
         <div class="row align-middle">
@@ -678,7 +690,8 @@ setInterval(function(){
 
 class ClickerEmpireGame{
     static main(){
-        Controller.start();
+        // Controller.start();
+        Controller.saveDataIndex();
     }
 }
 
