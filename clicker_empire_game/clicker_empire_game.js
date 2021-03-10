@@ -15,7 +15,6 @@ const config = {
 let currentUser;
 let displayedItems;
 let purchaseManager;
-let saveData;
 
 class User{
     static defaultAssets = 50000;
@@ -23,7 +22,7 @@ class User{
         this.name = this.#initializedName(name);
         this.age = this.#initializedAge(age);
         this.assets = User.defaultAssets;
-        this.timeKeeper = new TimeKeeper();
+        this.timeKeeper = this.#initializedTimeKeeper(this.name);
         this.hambuerCount = 0;
         this.items = new Items(flipMachine);
     }
@@ -62,15 +61,18 @@ class User{
         this.timeKeeper.initialized();
         this.hambuerCount = 0;
         this.items.initialized();
+        alert("初期化に成功しました");
     }
     // バリデーション
     #initializedName(name){
-        // if(name.length <= 0) alert("名前決めないなら勝手に決めちゃうよ？君の名前は名無しのゴンベだ！")
         return name.length > 0 ? name : "名前もないクズ";
     }
     #initializedAge(age){
-        // if(age <= 0) alert("Age is just a number! Be relax!!")
         return age > 0 ? age : 20;
+    }
+    // 浦島太郎よう
+    #initializedTimeKeeper(name){
+        return name == "urashimataro" ? new TimeKeeperForUrashima() : new NormalTimeKeeper();
     }
 }
 class TimeKeeper{
@@ -85,10 +87,22 @@ class TimeKeeper{
     }
     // 1年経過したかどうか
     passedOneYear(){
-        return this.amountOfDays != 0 && this.amountOfDays % 365 == 0;
+        throw "you need to implement in child class"
     }
     initialized(){
         this.amountOfDays = 0;
+    }
+}
+class NormalTimeKeeper extends TimeKeeper{
+    // 1年経過したかどうか
+    passedOneYear(){
+        return this.amountOfDays != 0 && this.amountOfDays % 365 == 0;
+    }
+}
+class TimeKeeperForUrashima extends TimeKeeper{
+    // 1年経過したかどうか
+    passedOneYear(){
+        return this.amountOfDays != 0 && this.amountOfDays % 10 == 0;
     }
 }
 // 本当はインターフェイスを使いたかったけどJavaScriptにはなかったから仕方なく継承
@@ -325,22 +339,6 @@ class PurchaseManager{
         }
     }
 }
-class SaveData{
-    static key = "clickerEmpireGameSaveData";
-    constructor(){
-        this.localStorage = localStorage;
-    }
-    save(value){
-        this.localStorage.setItem(SaveData.key, JSON.stringify(value));
-        alert("現在のデータの保存に成功しました。");
-    }
-    get(){
-        return this.localStorage[SaveData.key];
-    }
-    hasData(){
-        return this.localStorage[SaveData.key] != undefined;
-    }
-}
 class Controller{
     // トップページ(GET)
     static start(){
@@ -414,15 +412,10 @@ class Controller{
         ViewRender.renderMainPage()
     }
     static save(){
-        saveData.save(currentUser);
+        alert("進捗ゼロです。あと半年ほど待ってください。");
     }
     static restore(){
-        if(!saveData.hasData()){
-            alert("保存されたデータはありません");
-            return;
-        }
-        let object = JSON.parse(saveData.get());
-        console.log(object);
+        alert("進捗ゼロです。あと半年ほど待ってください。");
     }
     static #isUserPresent(){
         return currentUser != null;
@@ -655,7 +648,6 @@ setInterval(function(){
 
 class ClickerEmpireGame{
     static main(){
-        saveData = new SaveData();
         Controller.start();
     }
 }
